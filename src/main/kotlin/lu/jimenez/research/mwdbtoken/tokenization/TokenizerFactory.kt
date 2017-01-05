@@ -1,8 +1,7 @@
 package lu.jimenez.research.mwdbtoken.tokenization
 
 import lu.jimenez.research.mwdbtoken.tokenization.preprocessor.TokenPreprocessor
-import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.SimpleTokenizer
-import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer
+import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.*
 
 
 class TokenizerFactory(var tokenizerType: String) {
