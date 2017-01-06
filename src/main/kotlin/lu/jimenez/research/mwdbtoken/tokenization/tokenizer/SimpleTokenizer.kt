@@ -1,14 +1,13 @@
 package lu.jimenez.research.mwdbtoken.tokenization.tokenizer
 
-import lu.jimenez.research.mwdbtoken.tokenization.preprocessor.TokenPreprocessor
 import java.util.*
 
 
-class SimpleTokenizer(tokens: String) : Tokenizer {
+class SimpleTokenizer(tokens: String) : AbstractTokenizer() {
 
 
     val tokenizer: StringTokenizer = StringTokenizer(tokens)
-    private var tokenPreprocess: TokenPreprocessor? = null
+
 
     override fun countTokens(): Int {
         return tokenizer.countTokens()
@@ -36,8 +35,6 @@ class SimpleTokenizer(tokens: String) : Tokenizer {
 
     }
 
-    override fun setTokenPreprocessor(tokenPreprocessor: TokenPreprocessor?) {
-        tokenPreprocess = tokenPreprocessor
-    }
+
 
 }

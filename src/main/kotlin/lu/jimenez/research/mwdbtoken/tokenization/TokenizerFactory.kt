@@ -7,12 +7,14 @@ import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.*
 class TokenizerFactory(var tokenizerType: String) {
     var tokenPreprocess: TokenPreprocessor? = null
 
-    fun create(toTokenize: String): Tokenizer {
+    fun create(toTokenize: String, typeOfToken: String? = null): Tokenizer {
         val tokenizer: Tokenizer
         when (tokenizerType) {
             else -> tokenizer = SimpleTokenizer(toTokenize)
         }
         tokenizer.setTokenPreprocessor(tokenPreprocess)
+        if (typeOfToken != null)
+            tokenizer.setTypeOfToken(typeOfToken)
         return tokenizer
     }
 

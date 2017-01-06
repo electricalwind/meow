@@ -9,9 +9,13 @@ interface Tokenizer {
 
     fun getTokens(): List<String>
 
+    fun getTypeOfToken():String?
+
     fun hasMoreTokens(): Boolean
 
     fun nextToken():String
 
     fun setTokenPreprocessor(tokenPreprocessor: TokenPreprocessor?)
+
+    fun setTypeOfToken(typeOfToken:String?)
 }
