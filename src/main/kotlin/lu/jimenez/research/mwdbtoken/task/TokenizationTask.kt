@@ -22,9 +22,8 @@ class TokenizationTask(tokenizer: String) {
     private fun tokenize(types: Array<String>?): Task {
         return newTask()
                 .thenDo { ctx: TaskContext ->
-                    var tokenizer = factory.create(ctx.resultAsStrings()[0])
                     var type: String? = types?.get(ctx.variable("i")[0] as Int)
-                    tokenizer.setTypeOfToken(type)
+                    var tokenizer = factory.create(ctx.resultAsStrings()[0],type)
                     ctx.continueWith(ctx.wrap(tokenizer))
                 }
     }
