@@ -14,15 +14,17 @@ public class ActionTokenizeStringsUsingTokenizer implements Action {
     private final String _tokenizer;
     private final String _preprocessor;
     private final String[] _toTokenize;
+    private final String _type;
 
-    public ActionTokenizeStringsUsingTokenizer(String p_tokenizer, String p_preprocessor, String... p_toTokenize) {
+    public ActionTokenizeStringsUsingTokenizer(String p_tokenizer, String p_preprocessor, String p_type, String... p_toTokenize) {
         this._tokenizer = p_tokenizer;
         this._preprocessor = p_preprocessor;
+        this._type = p_type;
         this._toTokenize = p_toTokenize;
     }
 
     public void eval(final TaskContext ctx) {
-        TokenizationTask.tokenizeStringsUsingTokenizer(_tokenizer, _preprocessor, _toTokenize)
+        TokenizationTask.tokenizeStringsUsingTokenizer(_tokenizer, _preprocessor, _type, _toTokenize)
                 .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD,
                         new Callback<TaskResult>() {
                             public void on(TaskResult res) {
@@ -37,6 +39,8 @@ public class ActionTokenizeStringsUsingTokenizer implements Action {
         builder.append(_tokenizer);
         builder.append(Constants.TASK_PARAM_SEP);
         builder.append(_preprocessor);
+        builder.append(Constants.TASK_PARAM_SEP);
+        builder.append(_type);
         if (_toTokenize != null && _toTokenize.length > 0) {
             builder.append(Constants.TASK_PARAM_SEP);
             TaskHelper.serializeStringParams(_toTokenize, builder);

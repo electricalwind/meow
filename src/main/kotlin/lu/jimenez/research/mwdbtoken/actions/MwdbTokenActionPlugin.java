@@ -13,6 +13,12 @@ public class MwdbTokenActionPlugin extends BasePlugin {
 
     public MwdbTokenActionPlugin() {
 
+        declareTaskAction(MwdbTokenActionNames.INITIALIZE_VOCABULARY, new TaskActionFactory() {
+            public Action create(String[] params, Map<Integer, Task> contextTasks) {
+                return initializeVocabulary();
+            }
+        });
+
         declareTaskAction(MwdbTokenActionNames.RETRIEVE_VOCABULARY_NODE, new TaskActionFactory() {
             public Action create(String[] params, Map<Integer, Task> contextTasks) {
                 return retrieveVocabularyNode();
@@ -27,14 +33,14 @@ public class MwdbTokenActionPlugin extends BasePlugin {
 
         declareTaskAction(MwdbTokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER, new TaskActionFactory() {
             public Action create(String[] params, Map<Integer, Task> contextTasks) {
-                if (params.length < 3) {
+                if (params.length < 4) {
                     throw new RuntimeException(MwdbTokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER + " action needs at least 3 parameters. Received:" + params.length);
                 }
-                final String[] getParams = new String[params.length - 2];
-                if (params.length > 2) {
-                    System.arraycopy(params, 2, getParams, 0, params.length - 2);
+                final String[] getParams = new String[params.length - 3];
+                if (params.length > 3) {
+                    System.arraycopy(params, 3, getParams, 0, params.length - 2);
                 }
-                return tokenizeStringsUsingTokenizer(params[0], params[1], getParams);
+                return tokenizeStringsUsingTokenizer(params[0], params[1], params[2], getParams);
             }
         });
     }

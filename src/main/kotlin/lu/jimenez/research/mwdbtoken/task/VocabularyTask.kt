@@ -13,6 +13,7 @@ object VocabularyTask : KLogging() {
     /**
      * Create a NodeIndex vocabulary
      */
+    @JvmStatic
     fun initializeVocabulary(): Task {
         return newTask()
                 .createNode()
@@ -43,15 +44,16 @@ object VocabularyTask : KLogging() {
         return newTask()
                 .createNode()
                 .setAttribute(TOKEN_NAME, Type.STRING, "token")
-                .addVarToRelation(VOCABULARY_TOKEN_INDEX, "Vocabulary", TOKEN_NAME)
                 .defineAsVar("newToken")
+                .readVar("Vocabulary")
+                .addVarToRelation(VOCABULARY_TOKEN_INDEX, "newToken", TOKEN_NAME)
                 .createNode()
                 .thenDo {
                     ActionFunction {
                         ctx: TaskContext ->
                         val invertedIndex = ctx.resultAsNodes()[0]
                         val newToken = ctx.variable("newToken")[0] as Node
-                        invertedIndex.getOrCreate(INVERTED_INDEX_NODE_II, Type.LONG_TO_LONG_ARRAY_MAP)
+                        invertedIndex.getOrCreate(INVERTED_INDEX_NODE_II, Type.EGRAPH)
                         invertedIndex.addToRelation(INVERTED_INDEX_WORD_RELATION, newToken)
                         newToken.addToRelation(WORD_INVERTED_INDEX_RELATION, invertedIndex)
                         ctx.continueTask()

@@ -25,4 +25,6 @@ public final class Constants {
 
     public final static String INVERTED_INDEX_NODE_II = "invertedIndex";
 
+    public final static String NO_TYPE_TOKENIZE = "noType";
+
 }

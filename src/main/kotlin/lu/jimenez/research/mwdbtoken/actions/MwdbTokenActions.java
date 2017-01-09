@@ -4,6 +4,10 @@ import org.mwg.task.Action;
 
 public class MwdbTokenActions {
 
+    public static Action initializeVocabulary(){
+        return new ActionInitializeVocabulary();
+    }
+
     public static Action retrieveVocabularyNode(){
         return new ActionRetrieveVocabularyNode();
     }
@@ -12,7 +16,7 @@ public class MwdbTokenActions {
         return new ActionGetOrCreateTokensFromString(stringTokens);
     }
 
-    public static Action tokenizeStringsUsingTokenizer(String tokenizer, String preprocessor, String... toTokenize){
-        return new ActionTokenizeStringsUsingTokenizer(tokenizer,preprocessor,toTokenize);
+    public static Action tokenizeStringsUsingTokenizer(String tokenizer, String preprocessor,String type, String... toTokenize){
+        return new ActionTokenizeStringsUsingTokenizer(tokenizer,preprocessor,type,toTokenize);
     }
 }
