@@ -6,6 +6,7 @@ import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import org.mwg.*
 import org.mwg.core.task.Actions.*
 import org.mwg.plugin.SchedulerAffinity
+import org.mwg.struct.*
 import org.mwg.task.Task
 
 
@@ -135,12 +136,16 @@ object RelationTask {
 
     private fun createTokenRelation(): Task {
         return newTask()
+
                 .createNode()
                 .defineAsVar("relationNode")
                 .addVarToRelation(TOKENIZE_CONTENT_FATHER, nodeVar)
                 .setAttribute(TOKENIZE_CONTENT_NAME, Type.STRING, relationVar)
+
+
                 .readVar(nodeVar)
                 .addVarToRelation(relationVar, "relationNode")
+
                 .readVar(tokenizerVar)
                 .thenDo { ctx ->
                     val tokenizer = ctx.result()[0] as Tokenizer
@@ -153,11 +158,23 @@ object RelationTask {
                 .forEach(
                         newTask()
                                 .defineAsVar("token")
-                                .addVarToRelation(TOKENIZE_CONTENT_TOKENS,"relationNode")
+
                                 .traverse(WORD_INVERTED_INDEX_RELATION)
                                 .thenDo { ctx ->
-                                    //todo
+                                    val ii = ctx.resultAsNodes()[0]
+                                    val egraph: EGraph = ii.get(INVERTED_INDEX_NODE_II) as EGraph
+                                    val newNode = egraph.newNode()
+                                    newNode.set("type", Type.STRING, ctx.variable("type")[0] as String)
+                                    newNode.set("relatedTo", Type.LONG, (ctx.variable("relationNode")[0] as Node).id())
+                                    val position = (newNode.getOrCreate("position", Type.LONG_ARRAY) as LongArray).toMutableList()
+                                    position.toMutableList().add(ctx.variable("i")[0] as Long)
+                                    newNode.set("position", Type.LONG_ARRAY, position.toTypedArray())
+                                    val erel =egraph.root().get("nodes") as ERelation
+                                    erel.add(newNode)
                                 }
+
+                                .readVar("relationNode")
+                                .addVarToRelation(TOKENIZE_CONTENT_TOKENS, "token")
                 )
 
 

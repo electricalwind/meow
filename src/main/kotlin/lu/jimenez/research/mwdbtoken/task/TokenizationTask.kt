@@ -9,11 +9,11 @@ import org.mwg.task.*
 class TokenizationTask(tokenizer: String) {
     val factory: TokenizerFactory = TokenizerFactory(tokenizer)
 
-    fun setPreprocessor(preprocessor: TokenPreprocessor?) {
+    private fun setPreprocessor(preprocessor: TokenPreprocessor?) {
         factory.tokenPreprocess = preprocessor
     }
 
-    fun tokenizeString(toTokenize: Array<String>, types: Array<String>?): Task {
+    private fun tokenizeString(toTokenize: Array<String>, types: Array<String>?): Task {
         return newTask()
                 .inject(toTokenize)
                 .map(tokenize(types))

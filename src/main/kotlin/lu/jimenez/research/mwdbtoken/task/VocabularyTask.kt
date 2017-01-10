@@ -6,6 +6,7 @@ import lu.jimenez.research.mylittleplugin.MyLittleActions.ifEmptyThen
 import mu.KLogging
 import org.mwg.*
 import org.mwg.core.task.Actions.newTask
+import org.mwg.struct.EGraph
 import org.mwg.task.*
 
 object VocabularyTask : KLogging() {
@@ -53,7 +54,12 @@ object VocabularyTask : KLogging() {
                         ctx: TaskContext ->
                         val invertedIndex = ctx.resultAsNodes()[0]
                         val newToken = ctx.variable("newToken")[0] as Node
-                        invertedIndex.getOrCreate(INVERTED_INDEX_NODE_II, Type.EGRAPH)
+                        val egraph : EGraph = invertedIndex.getOrCreate(INVERTED_INDEX_NODE_II, Type.EGRAPH) as EGraph
+                        val root = egraph.newNode()
+                        root.set("name",Type.STRING,"root")
+                        root.getOrCreate("node",Type.ERELATION)
+                        egraph.setRoot(root)
+                        //to check
                         invertedIndex.addToRelation(INVERTED_INDEX_WORD_RELATION, newToken)
                         newToken.addToRelation(WORD_INVERTED_INDEX_RELATION, invertedIndex)
                         ctx.continueTask()
