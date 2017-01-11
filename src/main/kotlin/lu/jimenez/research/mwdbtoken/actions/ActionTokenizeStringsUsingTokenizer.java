@@ -36,9 +36,9 @@ public class ActionTokenizeStringsUsingTokenizer implements Action {
     public void serialize(StringBuilder builder) {
         builder.append(MwdbTokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER);
         builder.append(Constants.TASK_PARAM_OPEN);
-        builder.append(_tokenizer);
+        TaskHelper.serializeString(_tokenizer,builder,true);
         builder.append(Constants.TASK_PARAM_SEP);
-        builder.append(_preprocessor);
+        TaskHelper.serializeString(_preprocessor,builder,true);
         builder.append(Constants.TASK_PARAM_SEP);
         builder.append(_type);
         if (_toTokenize != null && _toTokenize.length > 0) {
