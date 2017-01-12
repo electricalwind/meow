@@ -1,8 +1,10 @@
 package lu.jimenez.research.mwdbtoken.actions;
 
 import org.junit.jupiter.api.Test;
+import org.mwg.Node;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 import org.mwg.utility.VerboseHook;
 
 import static lu.jimenez.research.mwdbtoken.Constants.ENTRY_POINT_NODE_NAME;
@@ -19,11 +21,17 @@ public class ActionRetrieveVocabularyNodeTest extends ActionTest {
         initGraph();
         newTask()
                 .then(initializeVocabulary())
+                .inject("3")
                 .then(retrieveVocabularyNode())
+                .println("{{result}}")
                 .thenDo(new ActionFunction() {
                             public void eval(TaskContext ctx) {
                                 assertEquals(ctx.resultAsNodes().size(), 1);
-                                assertEquals(ctx.resultAsNodes().get(0).get(ENTRY_POINT_NODE_NAME), VOCABULARY_NODE_NAME);
+                                TaskResult tr= ctx.result();
+                                Node node = (Node)tr.get(0);
+                                String name  = (String) node.get(ENTRY_POINT_NODE_NAME);
+                                assertEquals(name, VOCABULARY_NODE_NAME);
+                                ctx.continueTask();
                             }
                         }
                 ).execute(graph, null);

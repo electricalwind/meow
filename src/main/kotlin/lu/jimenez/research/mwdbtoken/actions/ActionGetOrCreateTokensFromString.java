@@ -9,8 +9,6 @@ import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-import static org.mwg.core.task.Actions.newTask;
-
 public class ActionGetOrCreateTokensFromString implements Action {
 
     private final String[] _tokenString;
@@ -20,8 +18,7 @@ public class ActionGetOrCreateTokensFromString implements Action {
     }
 
     public void eval(final TaskContext ctx) {
-        newTask()
-                .mapReduce(VocabularyTask.getOrCreateTokensFromString(_tokenString))
+        VocabularyTask.getOrCreateTokensFromString(_tokenString)
                 .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD,
                         new Callback<TaskResult>() {
                             public void on(TaskResult res) {

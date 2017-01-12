@@ -1,26 +1,27 @@
 package lu.jimenez.research.mwdbtoken.actions;
 
 import lu.jimenez.research.mwdbtoken.exception.UnitializeVocabularyException;
+import lu.jimenez.research.mwdbtoken.task.VocabularyTask;
 import org.mwg.Callback;
 import org.mwg.Constants;
-import org.mwg.NodeIndex;
+import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
-
-import static lu.jimenez.research.mwdbtoken.Constants.VOCABULARY_NODE_NAME;
+import org.mwg.task.TaskResult;
 
 public class ActionRetrieveVocabularyNode implements Action {
     public void eval(final TaskContext ctx) {
-        ctx.graph().indexIfExists(ctx.world(), ctx.time(), VOCABULARY_NODE_NAME, new Callback<NodeIndex>() {
-            public void on(NodeIndex result) {
-                if (result != null){
-                    ctx.continueWith(ctx.wrap(result));
-                }
-                else{
-                    ctx.endTask(ctx.result(),new UnitializeVocabularyException());
-                }
-            }
-        });
+        VocabularyTask.retrieveVocabulary()
+                .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD,
+                        new Callback<TaskResult>() {
+                            public void on(TaskResult res) {
+                                if (res.size() == 0) {
+                                    ctx.endTask(res, new UnitializeVocabularyException());
+                                } else {
+                                    ctx.continueWith(res);
+                                }
+                            }
+                        });
     }
 
     public void serialize(StringBuilder builder) {

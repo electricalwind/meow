@@ -23,6 +23,11 @@ object VocabularyTask : KLogging() {
     }
 
     @JvmStatic
+    fun retrieveVocabulary():Task{
+        return newTask()
+                .readGlobalIndex(ENTRY_POINT_INDEX,ENTRY_POINT_NODE_NAME,VOCABULARY_NODE_NAME)
+    }
+    @JvmStatic
     fun getOrCreateTokensFromString(tokens: Array<String>): Task {
         return newTask()
                 .then(retrieveVocabularyNode())

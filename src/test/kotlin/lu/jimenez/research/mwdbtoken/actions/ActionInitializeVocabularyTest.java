@@ -20,6 +20,7 @@ public class ActionInitializeVocabularyTest extends ActionTest {
                 .thenDo(new ActionFunction() {
                             public void eval(TaskContext context) {
                                 assertEquals(context.resultAsNodes().size(), 1);
+                                context.continueTask();
                             }
                         }
                 )

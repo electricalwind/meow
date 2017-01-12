@@ -12,23 +12,25 @@ import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.initializeV
 import static org.junit.Assert.assertEquals;
 import static org.mwg.core.task.Actions.newTask;
 
-public class ActionGetOrCreateTokensFromStringTest extends ActionTest{
+public class ActionGetOrCreateTokensFromStringTest extends ActionTest {
 
     @Test
-    public void createOneTokennoInit(){
+    public void createOneTokennoInit() {
         initGraph();
         newTask()
                 .mapReduce(VocabularyTask.getOrCreateTokensFromString(new String[]{"Token"}))
                 .thenDo(new ActionFunction() {
                     public void eval(TaskContext ctx) {
-                        assert(false);
+                        assert (false);
+                        ctx.continueTask();
                     }
                 })
-                .execute(graph,null);
+                .execute(graph, null);
+        removeGraph();
     }
 
     @Test
-    public void createOneToken(){
+    public void createOneToken() {
         initGraph();
         newTask()
                 .then(initializeVocabulary())
@@ -36,33 +38,60 @@ public class ActionGetOrCreateTokensFromStringTest extends ActionTest{
                 .thenDo(new ActionFunction() {
                     public void eval(TaskContext ctx) {
                         TaskResult<Node> tok = ctx.resultAsNodes();
-                        assertEquals(1,tok.size());
+                        assertEquals(1, tok.size());
                         Node n = tok.get(0);
-                        assertEquals("Token",n.get(TOKEN_NAME));
+                        assertEquals("Token", n.get(TOKEN_NAME));
+                        ctx.continueTask();
                     }
-                });
+                })
+                .execute(graph, null);
+
+        removeGraph();
     }
 
     @Test
-    public void createSeveralTokens(){
+    public void createSeveralTokens() {
 
         initGraph();
 
+        newTask()
+                .then(initializeVocabulary())
+                .mapReduce(VocabularyTask.getOrCreateTokensFromString(new String[]{"Token","Token2","Token3","Token4"}))
+                .thenDo(new ActionFunction() {
+                    public void eval(TaskContext ctx) {
+                        TaskResult<Node> tok = ctx.resultAsNodes();
+                        assertEquals(4, tok.size());
+                        Node n = tok.get(0);
+                        assertEquals("Token", n.get(TOKEN_NAME));
+                        ctx.continueTask();
+                    }
+                })
+                .execute(graph, null);
+
+        removeGraph();
     }
 
     @Test
-    public void retrieveOneAlreadyExistingToken(){
+    public void retrieveOneAlreadyExistingToken() {
         initGraph();
+
+        removeGraph();
     }
 
     @Test
-    public void retrieveSeveralAlreadyExistingToken(){
+    public void retrieveSeveralAlreadyExistingToken() {
+
         initGraph();
+
+        removeGraph();
     }
 
     @Test
-    public void mix(){
+    public void mix() {
+
         initGraph();
+
+        removeGraph();
     }
 
 }
