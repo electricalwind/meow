@@ -16,7 +16,7 @@ class TokenizationTask(tokenizer: String) {
     private fun tokenizeString(toTokenize: Array<String>, types: Array<String>?): Task {
         return newTask()
                 .inject(toTokenize)
-                .map(tokenize(types))
+                .flatMap(tokenize(types))
     }
 
     private fun tokenize(types: Array<String>?): Task {
@@ -44,8 +44,8 @@ class TokenizationTask(tokenizer: String) {
                     val listType = mutableListOf<String>()
                     var i = 0
                     while (i < params.size) {
-                        listString.add(params[i])
-                        listType.add(params[i + 1])
+                        listString.add(params[i+1])
+                        listType.add(params[i])
                         i += 2
                     }
                     toTokenize = listString.toTypedArray()

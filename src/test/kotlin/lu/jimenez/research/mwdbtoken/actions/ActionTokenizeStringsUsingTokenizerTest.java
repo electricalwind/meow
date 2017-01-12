@@ -24,9 +24,10 @@ public class ActionTokenizeStringsUsingTokenizerTest extends ActionTest {
                         Tokenizer tokenizer = (Tokenizer) ctx.result().get(0);
                         assertEquals(tokenizer.countTokens(), 5);
                         assertEquals(tokenizer.getTypeOfToken(), "my type");
+
                     }
                 })
-                .addHook(new VerboseHook())
+                //.addHook(new VerboseHook())
                 .execute(graph, null);
     }
 
@@ -42,11 +43,11 @@ public class ActionTokenizeStringsUsingTokenizerTest extends ActionTest {
                         assertEquals(tokenizer.countTokens(), 5);
                         assertEquals(tokenizer.getTypeOfToken(), "my type");
                         Tokenizer tokenizer2 = (Tokenizer) ctx.result().get(1);
-                        assertEquals(tokenizer.countTokens(), 6);
-                        assertEquals(tokenizer.getTypeOfToken(), "my second type");
+                        assertEquals(tokenizer2.countTokens(), 6);
+                        assertEquals(tokenizer2.getTypeOfToken(), "my second type");
                     }
                 })
-                .addHook(new VerboseHook())
+                //.addHook(new VerboseHook())
                 .execute(graph, null);
     }
 
@@ -63,7 +64,7 @@ public class ActionTokenizeStringsUsingTokenizerTest extends ActionTest {
                         assertEquals(tokenizer.getTypeOfToken(), Constants.NO_TYPE_TOKENIZE);
                     }
                 })
-                .addHook(new VerboseHook())
+                //.addHook(new VerboseHook())
                 .execute(graph, null);
     }
 

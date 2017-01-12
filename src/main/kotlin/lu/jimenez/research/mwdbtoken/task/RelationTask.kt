@@ -12,6 +12,7 @@ import org.mwg.task.Task
 
 object RelationTask {
 
+    @JvmStatic
     fun updateOrCreateTokenizeRelationsToNodes(tokenizersVar: String, nodesVar: String, relationList: Array<String>): Task {
 
         return newTask()
