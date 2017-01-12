@@ -25,6 +25,7 @@ public class ActionInitializeVocabularyTest extends ActionTest {
                         }
                 )
                 .execute(graph,null);
+        removeGraph();
     }
 
 }

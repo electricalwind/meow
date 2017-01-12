@@ -14,7 +14,20 @@ public class ActionInitializeVocabulary implements Action {
                 .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD,
                         new Callback<TaskResult>() {
                             public void on(TaskResult res) {
-                                ctx.continueWith(res);
+                                Exception exceptionDuringTask = null;
+                                if (res != null) {
+                                    if (res.output() != null) {
+                                        ctx.append(res.output());
+                                    }
+                                    if (res.exception() != null) {
+                                        exceptionDuringTask = res.exception();
+                                    }
+                                }
+                                if (exceptionDuringTask != null) {
+                                    ctx.endTask(res, exceptionDuringTask);
+                                } else {
+                                    ctx.continueWith(res);
+                                }
                             }
                         });
     }
@@ -24,6 +37,7 @@ public class ActionInitializeVocabulary implements Action {
         builder.append(Constants.TASK_PARAM_OPEN);
         builder.append(Constants.TASK_PARAM_CLOSE);
     }
+
     @Override
     public String toString() {
         final StringBuilder res = new StringBuilder();

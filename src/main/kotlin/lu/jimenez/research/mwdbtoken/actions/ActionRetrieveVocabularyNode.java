@@ -17,6 +17,18 @@ public class ActionRetrieveVocabularyNode implements Action {
                             public void on(TaskResult res) {
                                 if (res.size() == 0) {
                                     ctx.endTask(res, new UnitializeVocabularyException());
+                                }
+                                Exception exceptionDuringTask = null;
+                                if (res != null) {
+                                    if (res.output() != null) {
+                                        ctx.append(res.output());
+                                    }
+                                    if (res.exception() != null) {
+                                        exceptionDuringTask = res.exception();
+                                    }
+                                }
+                                if (exceptionDuringTask != null) {
+                                    ctx.endTask(res, exceptionDuringTask);
                                 } else {
                                     ctx.continueWith(res);
                                 }
