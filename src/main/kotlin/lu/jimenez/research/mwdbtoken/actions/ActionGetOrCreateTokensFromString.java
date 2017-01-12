@@ -25,30 +25,45 @@ public class ActionGetOrCreateTokensFromString implements Action {
                 .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD,
                         new Callback<TaskResult>() {
                             public void on(TaskResult res) {
-                                ctx.continueWith(res);
+                                Exception exceptionDuringTask = null;
+                                if (res != null) {
+                                    if (res.output() != null) {
+                                        ctx.append(res.output());
+                                    }
+                                    if (res.exception() != null) {
+                                        exceptionDuringTask = res.exception();
+                                    }
+                                }
+                                if (exceptionDuringTask != null) {
+                                    ctx.endTask(res, exceptionDuringTask);
+                                } else {
+                                    ctx.continueWith(res);
+                                }
                             }
                         });
     }
 
-    /**ctx.graph().indexIfExists(ctx.world(), ctx.time(), VOCABULARY_NODE_NAME, new Callback<NodeIndex>() {
-     public void on(final NodeIndex result) {
-     if (result != null){
-     Query query = ctx.graph().newQuery();
-     query.add(TOKEN_NAME,_tokenString);
-     query.setTime(ctx.time());
-     query.setWorld(ctx.world());
-     result.findByQuery(query, new Callback<Node[]>() {
-     public void on(Node[] node) {
-     result.free();
-     ctx.continueWith(ctx.wrap(node));
-     }
-     });
-     }
-     else{
-     throw new UnitializeVocabularyException();
-     }
-     }
-     });*/
+    /**
+     * ctx.graph().indexIfExists(ctx.world(), ctx.time(), VOCABULARY_NODE_NAME, new Callback<NodeIndex>() {
+     * public void on(final NodeIndex result) {
+     * if (result != null){
+     * Query query = ctx.graph().newQuery();
+     * query.add(TOKEN_NAME,_tokenString);
+     * query.setTime(ctx.time());
+     * query.setWorld(ctx.world());
+     * result.findByQuery(query, new Callback<Node[]>() {
+     * public void on(Node[] node) {
+     * result.free();
+     * ctx.continueWith(ctx.wrap(node));
+     * }
+     * });
+     * }
+     * else{
+     * throw new UnitializeVocabularyException();
+     * }
+     * }
+     * });
+     */
 
 
     public void serialize(StringBuilder builder) {

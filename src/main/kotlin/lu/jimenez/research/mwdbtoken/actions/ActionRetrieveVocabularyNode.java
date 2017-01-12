@@ -1,12 +1,12 @@
 package lu.jimenez.research.mwdbtoken.actions;
 
+import lu.jimenez.research.mwdbtoken.exception.UnitializeVocabularyException;
 import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.NodeIndex;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
-import lu.jimenez.research.mwdbtoken.exception.UnitializeVocabularyException;
 import static lu.jimenez.research.mwdbtoken.Constants.VOCABULARY_NODE_NAME;
 
 public class ActionRetrieveVocabularyNode implements Action {
@@ -17,7 +17,7 @@ public class ActionRetrieveVocabularyNode implements Action {
                     ctx.continueWith(ctx.wrap(result));
                 }
                 else{
-                    throw new UnitializeVocabularyException();
+                    ctx.endTask(ctx.result(),new UnitializeVocabularyException());
                 }
             }
         });

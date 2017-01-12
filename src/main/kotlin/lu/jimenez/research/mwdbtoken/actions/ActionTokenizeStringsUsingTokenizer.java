@@ -18,7 +18,10 @@ public class ActionTokenizeStringsUsingTokenizer implements Action {
 
     public ActionTokenizeStringsUsingTokenizer(String p_tokenizer, String p_preprocessor, String p_type, String... p_toTokenize) {
         this._tokenizer = p_tokenizer;
-        this._preprocessor = p_preprocessor;
+        if (p_preprocessor == null)
+            this._preprocessor = "";
+        else
+            this._preprocessor = p_preprocessor;
         this._type = p_type;
         this._toTokenize = p_toTokenize;
     }
@@ -36,9 +39,9 @@ public class ActionTokenizeStringsUsingTokenizer implements Action {
     public void serialize(StringBuilder builder) {
         builder.append(MwdbTokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER);
         builder.append(Constants.TASK_PARAM_OPEN);
-        TaskHelper.serializeString(_tokenizer,builder,true);
+        TaskHelper.serializeString(_tokenizer, builder, true);
         builder.append(Constants.TASK_PARAM_SEP);
-        TaskHelper.serializeString(_preprocessor,builder,true);
+        TaskHelper.serializeString(_preprocessor, builder, true);
         builder.append(Constants.TASK_PARAM_SEP);
         builder.append(_type);
         if (_toTokenize != null && _toTokenize.length > 0) {
