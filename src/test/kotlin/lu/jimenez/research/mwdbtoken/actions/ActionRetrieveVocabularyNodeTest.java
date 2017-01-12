@@ -5,7 +5,6 @@ import org.mwg.Node;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
-import org.mwg.utility.VerboseHook;
 
 import static lu.jimenez.research.mwdbtoken.Constants.ENTRY_POINT_NODE_NAME;
 import static lu.jimenez.research.mwdbtoken.Constants.VOCABULARY_NODE_NAME;
@@ -46,11 +45,13 @@ public class ActionRetrieveVocabularyNodeTest extends ActionTest {
                 .thenDo(new ActionFunction() {
                             public void eval(TaskContext ctx) {
                                 assert (false);
+                                ctx.continueTask();
                             }
                         }
                 )
-                .addHook(new VerboseHook())
+                //.addHook(new VerboseHook())
                 .execute(graph, null);
+        assert(true);
         removeGraph();
     }
 }

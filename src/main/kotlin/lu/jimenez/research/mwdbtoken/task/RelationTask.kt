@@ -44,7 +44,7 @@ object RelationTask {
                     .forEach(
                             newTask()
                                     .defineAsVar(nodeVar)
-                                    .mapReduce(uocTokenizeRelation())
+                                    .flatMapReduce(uocTokenizeRelation())
                     )
         } else {
             return newTask()
@@ -64,9 +64,12 @@ object RelationTask {
                                                         ctx.defineVariable(relationVar, relation)
                                                         ctx.continueTask()
                                                     }
-                                                    .mapReduce(uocTokenizeRelation())
+                                                    .flatMapReduce(uocTokenizeRelation())
                                     ),
-                            throw RuntimeException("The number of relations and nodes are not similar! (1 tokenizer)"))
+                            thenDo { ctx ->
+                                ctx.endTask(ctx.result(), RuntimeException("The number of relations and nodes are not similar! (1 tokenizer)"))
+                            })
+
         }
     }
 
@@ -85,9 +88,11 @@ object RelationTask {
                                             ctx.defineVariable(relationVar, relation)
                                             ctx.continueTask()
                                         }
-                                        .mapReduce(uocTokenizeRelation())
+                                        .flatMapReduce(uocTokenizeRelation())
                                 ),
-                        throw RuntimeException("The number of relations and tokenizers are not similar! (1 node)"))
+                        thenDo { ctx ->
+                            ctx.endTask(ctx.result(), RuntimeException("The number of relations and tokenizers are not similar! (1 node)"))
+                        })
     }
 
     private fun uocSeveralTokenizerToSeveralNodes(tokenizersVar: String, nodesVar: String, relationList: Array<String>): Task {
@@ -110,12 +115,17 @@ object RelationTask {
                                                                     ctx.defineVariable(nodeVar, node)
                                                                     ctx.continueTask()
                                                                 }
-                                                                .mapReduce(uocTokenizeRelation())
+                                                                .flatMapReduce(uocTokenizeRelation())
                                                 ),
-                                        throw RuntimeException("The number of nodes and tokenizers are not similar!")
-                                ),
-                        throw RuntimeException("The number of relations and tokenizers are not similar! ")
-                )
+                                        thenDo { ctx ->
+                                            ctx.endTask(ctx.result(), RuntimeException("The number of nodes and tokenizers are not similar!"))
+                                        })
+
+                        ,
+                        thenDo { ctx ->
+                            ctx.endTask(ctx.result(), RuntimeException("The number of relations and tokenizers are not similar! "))
+                        })
+
     }
 
 
@@ -169,7 +179,7 @@ object RelationTask {
                                     val position = (newNode.getOrCreate("position", Type.LONG_ARRAY) as LongArray).toMutableList()
                                     position.toMutableList().add(ctx.variable("i")[0] as Long)
                                     newNode.set("position", Type.LONG_ARRAY, position.toTypedArray())
-                                    val erel =egraph.root().get("nodes") as ERelation
+                                    val erel = egraph.root().get("nodes") as ERelation
                                     erel.add(newNode)
                                 }
 

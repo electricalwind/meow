@@ -5,6 +5,7 @@ import lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.retrieveVocabulary
 import lu.jimenez.research.mylittleplugin.MyLittleActions.ifEmptyThen
 import mu.KLogging
 import org.mwg.*
+import org.mwg.Constants.BEGINNING_OF_TIME
 import org.mwg.core.task.Actions.newTask
 import org.mwg.struct.EGraph
 import org.mwg.task.Task
@@ -17,9 +18,19 @@ object VocabularyTask : KLogging() {
     @JvmStatic
     fun initializeVocabulary(): Task {
         return newTask()
+                .thenDo { ctx ->
+                    ctx.setVariable("time",ctx.time())
+                    ctx.setVariable("world",ctx.world())
+                    ctx.setTime(BEGINNING_OF_TIME)
+                    ctx.setWorld(0L)
+                }
                 .createNode()
                 .setAttribute(ENTRY_POINT_NODE_NAME, Type.STRING, VOCABULARY_NODE_NAME)
                 .addToGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME)
+                .thenDo { ctx ->
+                    ctx.setTime(ctx.variable("time")[0] as Long)
+                    ctx.setWorld(ctx.variable("world")[0] as Long)
+                }
     }
 
     @JvmStatic
@@ -49,6 +60,12 @@ object VocabularyTask : KLogging() {
 
     private fun createToken(): Task {
         return newTask()
+                .thenDo { ctx ->
+                    ctx.setVariable("time",ctx.time())
+                    ctx.setVariable("world",ctx.world())
+                    ctx.setTime(BEGINNING_OF_TIME)
+                    ctx.setWorld(0L)
+                }
                 .createNode()
                 .setAttribute(TOKEN_NAME, Type.STRING, "{{token}}")
                 .defineAsVar("newToken")
@@ -76,6 +93,10 @@ object VocabularyTask : KLogging() {
                     invertedIndex.addToRelation(INVERTED_INDEX_WORD_RELATION, newToken)
                     newToken.addToRelation(WORD_INVERTED_INDEX_RELATION, invertedIndex)
                     ctx.continueTask()
+                }
+                .thenDo { ctx ->
+                    ctx.setTime(ctx.variable("time")[0] as Long)
+                    ctx.setWorld(ctx.variable("world")[0] as Long)
                 }
                 .readVar("newToken")
         //}
