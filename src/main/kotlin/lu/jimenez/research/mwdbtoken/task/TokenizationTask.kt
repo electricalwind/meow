@@ -2,8 +2,8 @@ package lu.jimenez.research.mwdbtoken.task
 
 import lu.jimenez.research.mwdbtoken.tokenization.*
 import lu.jimenez.research.mwdbtoken.tokenization.preprocessor.TokenPreprocessor
-import org.mwg.core.task.Actions.newTask
 import org.mwg.task.*
+import org.mwg.task.Tasks.newTask
 
 
 class TokenizationTask(tokenizer: String) {
@@ -16,7 +16,8 @@ class TokenizationTask(tokenizer: String) {
     private fun tokenizeString(toTokenize: Array<String>, types: Array<String>?): Task {
         return newTask()
                 .inject(toTokenize)
-                .flatMap(tokenize(types))
+                .map(tokenize(types))
+                .flat()
     }
 
     private fun tokenize(types: Array<String>?): Task {

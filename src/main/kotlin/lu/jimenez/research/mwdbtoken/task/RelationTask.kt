@@ -4,10 +4,10 @@ import lu.jimenez.research.mwdbtoken.Constants.*
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import org.mwg.*
-import org.mwg.core.task.Actions.*
+import org.mwg.Constants.BEGINNING_OF_TIME
 import org.mwg.plugin.SchedulerAffinity
-import org.mwg.struct.*
 import org.mwg.task.Task
+import org.mwg.task.Tasks.*
 
 
 object RelationTask {
@@ -45,7 +45,7 @@ object RelationTask {
                     .forEach(
                             newTask()
                                     .defineAsVar(nodeVar)
-                                    .flatMapReduce(uocTokenizeRelation())
+                                    .pipe(uocTokenizeRelation())
                     )
         } else {
             return newTask()
@@ -65,7 +65,7 @@ object RelationTask {
                                                         ctx.defineVariable(relationVar, relation)
                                                         ctx.continueTask()
                                                     }
-                                                    .flatMapReduce(uocTokenizeRelation())
+                                                    .pipe(uocTokenizeRelation())
                                     ),
                             thenDo { ctx ->
                                 ctx.endTask(ctx.result(), RuntimeException("The number of relations and nodes are not similar! (1 tokenizer)"))
@@ -89,7 +89,7 @@ object RelationTask {
                                             ctx.defineVariable(relationVar, relation)
                                             ctx.continueTask()
                                         }
-                                        .flatMapReduce(uocTokenizeRelation())
+                                        .pipe(uocTokenizeRelation())
                                 ),
                         thenDo { ctx ->
                             ctx.endTask(ctx.result(), RuntimeException("The number of relations and tokenizers are not similar! (1 node)"))
@@ -116,7 +116,7 @@ object RelationTask {
                                                                     ctx.defineVariable(nodeVar, node)
                                                                     ctx.continueTask()
                                                                 }
-                                                                .flatMapReduce(uocTokenizeRelation())
+                                                                .pipe(uocTokenizeRelation())
                                                 ),
                                         thenDo { ctx ->
                                             ctx.endTask(ctx.result(), RuntimeException("The number of nodes and tokenizers are not similar!"))
@@ -133,7 +133,8 @@ object RelationTask {
     private fun uocTokenizeRelation(): Task {
         return newTask()
                 .readVar(nodeVar)
-                .traverse(relationVar)
+
+                .traverse(TOKENIZE_CONTENT_RELATION, TOKENIZE_CONTENT_NAME, relationVar)
                 .then(ifEmptyThenElse(
                         createTokenRelation(),
                         updateTokenRelation()
@@ -143,6 +144,7 @@ object RelationTask {
     private fun updateTokenRelation(): Task {
         return newTask()
                 .defineAsVar("relationNode")
+        //TODO check for future?
     }
 
     private fun createTokenRelation(): Task {
@@ -150,43 +152,64 @@ object RelationTask {
 
                 .createNode()
                 .defineAsVar("relationNode")
+                .thenDo { ctx ->
+                    ctx.setVariable("relationNodeId", ctx.resultAsNodes()[0].id())
+                    ctx.continueTask()
+                }
                 .addVarToRelation(TOKENIZE_CONTENT_FATHER, nodeVar)
-                .setAttribute(TOKENIZE_CONTENT_NAME, Type.STRING, relationVar)
-
+                .setAttribute(TOKENIZE_CONTENT_NAME, Type.STRING, "{{$relationVar}}")
 
                 .readVar(nodeVar)
-                .addVarToRelation(relationVar, "relationNode")
+                .addVarToRelation(TOKENIZE_CONTENT_RELATION, "relationNode", TOKENIZE_CONTENT_NAME)
 
                 .readVar(tokenizerVar)
                 .thenDo { ctx ->
                     val tokenizer = ctx.result()[0] as Tokenizer
-                    ctx.defineVariable("type", tokenizer.getTypeOfToken() ?: NO_TYPE_TOKENIZE)
+                    ctx.setVariable("type", tokenizer.getTypeOfToken() ?: NO_TYPE_TOKENIZE)
                     newTask()
-                            .mapReduce(VocabularyTask.getOrCreateTokensFromString(tokenizer.getTokens().toTypedArray()))
+                            .pipe(VocabularyTask.getOrCreateTokensFromString(tokenizer.getTokens().toTypedArray()))
                             .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD
                             ) { res -> ctx.continueWith(res) }
                 }
                 .forEach(
                         newTask()
                                 .defineAsVar("token")
+                                .traverse(WORD_INVERTED_INDEX_RELATION, "id", "{{relationNodeId}}")
 
-                                .traverse(WORD_INVERTED_INDEX_RELATION)
+                                .then(
+                                        ifEmptyThenElse(
+                                                newTask()
+                                                        .then(executeAtWorldAndTime("0", "$BEGINNING_OF_TIME",
+                                                                newTask()
+                                                                        .createNode()
+                                                                        .setAttribute("id", Type.LONG, "{{relationNodeId}}")
+
+                                                                        .setAttribute("type", Type.STRING, "{{type}}")
+                                                                        .defineAsVar("invertedIndex")
+                                                                        .readVar("token")
+                                                                        .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex", "id")
+                                                                        .readVar("invertedIndex")
+                                                        )
+                                                        )
+                                                ,
+                                                newTask().then(checkForFuture())
+                                        )
+                                )
                                 .thenDo { ctx ->
-                                    val ii = ctx.resultAsNodes()[0]
-                                    val egraph: EGraph = ii.get(INVERTED_INDEX_NODE_II) as EGraph
-                                    val newNode = egraph.newNode()
-                                    newNode.set("type", Type.STRING, ctx.variable("type")[0] as String)
-                                    newNode.set("relatedTo", Type.LONG, (ctx.variable("relationNode")[0] as Node).id())
-                                    val position = (newNode.getOrCreate("position", Type.LONG_ARRAY) as LongArray).toMutableList()
-                                    position.toMutableList().add(ctx.variable("i")[0] as Long)
-                                    newNode.set("position", Type.LONG_ARRAY, position.toTypedArray())
-                                    val erel = egraph.root().get("nodes") as ERelation
-                                    erel.add(newNode)
+                                    val node = ctx.resultAsNodes()[0]
+                                    val position: MutableList<Int> = (node.get("position") as IntArray?)?.toMutableList() ?: mutableListOf<Int>()
+                                    position.add(ctx.variable("i")[0] as Int)
+                                    node.set("position", Type.INT_ARRAY, position.toIntArray())
+                                    ctx.continueTask()
                                 }
+
 
                                 .readVar("relationNode")
                                 .addVarToRelation(TOKENIZE_CONTENT_TOKENS, "token")
+
                 )
+                .readVar("relationNode")
+                .setAttribute("type", Type.STRING, "{{type}}")
 
 
     }
