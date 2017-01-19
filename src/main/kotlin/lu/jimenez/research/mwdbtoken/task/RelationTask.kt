@@ -113,7 +113,7 @@ object RelationTask {
                                                                 .thenDo { ctx ->
                                                                     val increment = ctx.variable("i")[0] as Int
                                                                     val relation = relationList[increment]
-                                                                    val node = ctx.variable(nodesVar)[0] as Node
+                                                                    val node = ctx.variable(nodesVar)[increment] as Node
                                                                     ctx.defineVariable(relationVar, relation)
                                                                     ctx.defineVariable(nodeVar, node)
                                                                     ctx.continueTask()
@@ -121,7 +121,7 @@ object RelationTask {
                                                                 .pipe(uocTokenizeRelation())
 
                                                 )
-                                                .readVar(nodeVar)
+                                                .readVar(nodesVar)
                                         ,
                                         thenDo { ctx ->
                                             ctx.endTask(ctx.result(), RuntimeException("The number of nodes and tokenizers are not similar!"))
