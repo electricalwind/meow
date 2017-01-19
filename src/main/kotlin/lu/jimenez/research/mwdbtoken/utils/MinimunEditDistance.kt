@@ -26,7 +26,7 @@ class MinimunEditDistance<T : Comparable<T>>(val former: Array<T>, val newer: Ar
                 val subsame: Int
                 val mod: Modification
 
-                if (former[j].compareTo(newer[i]) == 0) {
+                if (former[j - 1].compareTo(newer[i - 1]) == 0) {
                     subsame = minEditDistanceMatrix[i - 1][j - 1]
                     mod = Modification.Keep
                 } else {
@@ -74,10 +74,24 @@ class MinimunEditDistance<T : Comparable<T>>(val former: Array<T>, val newer: Ar
                 listAction.add(Pair(newer[i - 1], Modification.Insertion))
                 i -= 1
             } else {//Suppression
-                listAction.add(Pair(former[j - 1], Modification.Insertion))
+                listAction.add(Pair(former[j - 1], Modification.Suppression))
                 j -= 1
             }
         }
+        if (i != 0 && j != 0) throw RuntimeException("error in edit distance")
+        if (i != 0) {
+            while (i != 0) {
+                listAction.add(Pair(newer[i - 1], Modification.Insertion))
+                i -= 1
+            }
+        } else {
+            while (j != 0) {
+                listAction.add(Pair(former[j - 1], Modification.Suppression))
+                j -= 1
+            }
+        }
+
+
         return listAction.reversed()
     }
 
