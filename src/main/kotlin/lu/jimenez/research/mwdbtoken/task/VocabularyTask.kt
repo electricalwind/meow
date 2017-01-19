@@ -43,7 +43,7 @@ object VocabularyTask : KLogging() {
                 .flat()
     }
 
-    private fun retrieveToken(): Task {
+    fun retrieveToken(): Task {
         return newTask()
                 .defineAsVar("token")
                 .readVar("Vocabulary")

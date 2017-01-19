@@ -1,6 +1,7 @@
 package lu.jimenez.research.mwdbtoken.task
 
 import lu.jimenez.research.mwdbtoken.Constants.*
+import lu.jimenez.research.mwdbtoken.task.VocabularyTask.retrieveToken
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import org.mwg.*
@@ -149,6 +150,20 @@ object RelationTask {
     private fun updateTokenRelation(): Task {
         return newTask()
                 .defineAsVar("relationNode")
+                //?
+                .then(checkForFuture())
+                .thenDo { ctx ->
+                    val dephasing = ctx.resultAsNodes()[0].timeDephasing()
+                    if (dephasing == 0L)
+                        ctx.endTask(ctx.result(),RuntimeException("Trying to modify a tokenize content at the time of the previous modification"))
+                    else{
+                        val newToken  = ctx.variable(tokenizerVar)[0] as Tokenizer
+
+                        ctx.continueWith(ctx.wrap(newToken.getTokens().toTypedArray()))
+                    }
+                }.map(retrieveToken())
+
+
         //TODO check for future?
     }
 
