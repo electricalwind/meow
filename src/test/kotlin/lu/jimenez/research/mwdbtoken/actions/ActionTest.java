@@ -2,9 +2,10 @@ package lu.jimenez.research.mwdbtoken.actions;
 
 import lu.jimenez.research.mylittleplugin.MyLittleActionPlugin;
 import org.mwg.*;
-import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.internal.scheduler.NoopScheduler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mwg.Constants.BEGINNING_OF_TIME;
 
 public abstract class ActionTest {
 
@@ -36,12 +37,12 @@ public abstract class ActionTest {
                 root.addToRelation("children", n1);
 
                 //create some index
-                selfPointer.graph.index(0, 0, "roots", new Callback<NodeIndex>() {
+                selfPointer.graph.index(0, BEGINNING_OF_TIME, "roots", new Callback<NodeIndex>() {
                     public void on(NodeIndex rootsIndex) {
                         rootsIndex.addToIndex(root, "name");
                     }
                 });
-                selfPointer.graph.index(0, 0, "nodes", new Callback<NodeIndex>() {
+                selfPointer.graph.index(0, BEGINNING_OF_TIME, "nodes", new Callback<NodeIndex>() {
 
                     public void on(NodeIndex nodesIndex) {
                         nodesIndex.addToIndex(n0, "name");

@@ -18,12 +18,13 @@ public class ActionRetrieveVocabularyNode implements Action {
                                 if (res != null) {
                                     if (res.size() == 0) {
                                         ctx.endTask(res, new UnitializeVocabularyException());
-                                    }
-                                    if (res.output() != null) {
-                                        ctx.append(res.output());
+                                    } else {
+                                        if (res.output() != null) {
+                                            ctx.append(res.output());
+                                        }
                                         ctx.continueWith(res);
                                     }
-                                }else {
+                                } else {
                                     ctx.endTask(res, new UnitializeVocabularyException());
                                 }
                             }

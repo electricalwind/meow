@@ -11,47 +11,53 @@ import static lu.jimenez.research.mwdbtoken.Constants.VOCABULARY_NODE_NAME;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.initializeVocabulary;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.retrieveVocabularyNode;
 import static org.junit.Assert.assertEquals;
-import static org.mwg.core.task.Actions.newTask;
+import static org.mwg.task.Tasks.newTask;
 
 public class ActionRetrieveVocabularyNodeTest extends ActionTest {
 
     @Test
     public void testinit() {
+        int counter = 1;
+        final int[] i = {0};
         initGraph();
         newTask()
                 .then(initializeVocabulary())
                 .inject("3")
                 .then(retrieveVocabularyNode())
-                .println("{{result}}")
                 .thenDo(new ActionFunction() {
                             public void eval(TaskContext ctx) {
                                 assertEquals(ctx.resultAsNodes().size(), 1);
-                                TaskResult tr= ctx.result();
-                                Node node = (Node)tr.get(0);
-                                String name  = (String) node.get(ENTRY_POINT_NODE_NAME);
+                                TaskResult tr = ctx.result();
+                                Node node = (Node) tr.get(0);
+                                String name = (String) node.get(ENTRY_POINT_NODE_NAME);
                                 assertEquals(name, VOCABULARY_NODE_NAME);
+                                i[0]++;
                                 ctx.continueTask();
                             }
                         }
-                ).execute(graph, null);
+                )
+                .execute(graph, null);
+        assertEquals(counter, i[0]);
         removeGraph();
     }
 
     @Test
     public void testnoinit() {
         initGraph();
+        final int[] i = {0};
         newTask()
                 .then(retrieveVocabularyNode())
                 .thenDo(new ActionFunction() {
                             public void eval(TaskContext ctx) {
                                 assert (false);
+                                i[0]++;
                                 ctx.continueTask();
                             }
                         }
                 )
                 //.addHook(new VerboseHook())
                 .execute(graph, null);
-        assert(true);
+        assertEquals(0, i[0]);
         removeGraph();
     }
 }

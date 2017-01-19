@@ -3,7 +3,7 @@ package lu.jimenez.research.mwdbtoken.actions;
 import lu.jimenez.research.mwdbtoken.task.VocabularyTask;
 import org.mwg.Callback;
 import org.mwg.Constants;
-import org.mwg.core.task.TaskHelper;
+import org.mwg.internal.task.TaskHelper;
 import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;

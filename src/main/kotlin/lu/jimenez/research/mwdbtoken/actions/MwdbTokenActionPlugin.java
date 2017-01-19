@@ -1,47 +1,71 @@
 package lu.jimenez.research.mwdbtoken.actions;
 
-import org.mwg.base.BasePlugin;
+import org.mwg.Graph;
+import org.mwg.Type;
+import org.mwg.plugin.ActionFactory;
+import org.mwg.plugin.Plugin;
 import org.mwg.task.Action;
-import org.mwg.task.Task;
-import org.mwg.task.TaskActionFactory;
-
-import java.util.Map;
 
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.*;
 
-public class MwdbTokenActionPlugin extends BasePlugin {
+public class MwdbTokenActionPlugin implements Plugin {
 
-    public MwdbTokenActionPlugin() {
 
-        declareTaskAction(MwdbTokenActionNames.INITIALIZE_VOCABULARY, new TaskActionFactory() {
-            public Action create(String[] params, Map<Integer, Task> contextTasks) {
-                return initializeVocabulary();
-            }
-        });
+    public void start(Graph graph) {
 
-        declareTaskAction(MwdbTokenActionNames.RETRIEVE_VOCABULARY_NODE, new TaskActionFactory() {
-            public Action create(String[] params, Map<Integer, Task> contextTasks) {
-                return retrieveVocabularyNode();
-            }
-        });
+        graph.actionRegistry()
+                .declaration(MwdbTokenActionNames.INITIALIZE_VOCABULARY)
+                .setParams()
+                .setDescription("Initialize the plugin by creating a Vocabulary Node")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        return initializeVocabulary();
+                    }
+                });
 
-        declareTaskAction(MwdbTokenActionNames.GET_OR_CREATE_TOKENS_FROM_STRING, new TaskActionFactory() {
-            public Action create(String[] params, Map<Integer, Task> contextTasks) {
-                return getOrCreateTokensFromString(params);
-            }
-        });
+        graph.actionRegistry()
+                .declaration(MwdbTokenActionNames.RETRIEVE_VOCABULARY_NODE)
+                .setParams()
+                .setDescription("retrieve the Vocabulary Node")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        return retrieveVocabularyNode();
+                    }
+                });
 
-        declareTaskAction(MwdbTokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER, new TaskActionFactory() {
-            public Action create(String[] params, Map<Integer, Task> contextTasks) {
-                if (params.length < 4) {
-                    throw new RuntimeException(MwdbTokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER + " action needs at least 3 parameters. Received:" + params.length);
-                }
-                final String[] getParams = new String[params.length - 3];
-                if (params.length > 3) {
-                    System.arraycopy(params, 3, getParams, 0, params.length - 2);
-                }
-                return tokenizeStringsUsingTokenizer(params[0], params[1], params[2], getParams);
-            }
-        });
+
+        graph.actionRegistry()
+                .declaration(MwdbTokenActionNames.GET_OR_CREATE_TOKENS_FROM_STRING)
+                .setParams(Type.STRING_ARRAY)
+                .setDescription("Retrieve all the node corresponding to a token and create one if not existing")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        if (params[0] != null) {
+                            return getOrCreateTokensFromString((String[]) params[0]);
+                        } else return null;
+                    }
+                });
+        graph.actionRegistry()
+                .declaration(MwdbTokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER)
+                .setParams(Type.STRING, Type.STRING, Type.STRING, Type.STRING_ARRAY)
+                .setDescription("Tokenize a content and put the tokenizer in result, 1)tokenizer type, 2)preprocessor,3)type of content,4) content")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        if (params[3] != null) {
+                            return tokenizeStringsUsingTokenizer((String) params[0], (String) params[1], (String) params[2], (String[]) params[3]);
+                        } else return null;
+                    }
+                });
+
+
+    }
+
+    @Override
+    public void stop() {
+
     }
 }
