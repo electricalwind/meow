@@ -90,7 +90,9 @@ object RelationTask {
                                             ctx.continueTask()
                                         }
                                         .pipe(uocTokenizeRelation())
-                                ),
+
+                                ).readVar(nodeVar)
+                        ,
                         thenDo { ctx ->
                             ctx.endTask(ctx.result(), RuntimeException("The number of relations and tokenizers are not similar! (1 node)"))
                         })
@@ -117,7 +119,10 @@ object RelationTask {
                                                                     ctx.continueTask()
                                                                 }
                                                                 .pipe(uocTokenizeRelation())
-                                                ),
+
+                                                )
+                                                .readVar(nodeVar)
+                                        ,
                                         thenDo { ctx ->
                                             ctx.endTask(ctx.result(), RuntimeException("The number of nodes and tokenizers are not similar!"))
                                         })
