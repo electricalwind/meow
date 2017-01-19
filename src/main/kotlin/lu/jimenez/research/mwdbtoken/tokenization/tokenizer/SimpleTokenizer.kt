@@ -7,6 +7,7 @@ class SimpleTokenizer(tokens: String) : AbstractTokenizer() {
 
 
     val tokenizer: StringTokenizer = StringTokenizer(tokens)
+    val listOfTokens: MutableList<String> = mutableListOf()
 
 
     override fun countTokens(): Int {
@@ -14,11 +15,12 @@ class SimpleTokenizer(tokens: String) : AbstractTokenizer() {
     }
 
     override fun getTokens(): List<String> {
-        val tokenList = mutableListOf<String>()
+
+
         while (hasMoreTokens()) {
-            tokenList.add(nextToken())
+            nextToken()
         }
-        return tokenList
+        return listOfTokens
     }
 
     override fun hasMoreTokens(): Boolean {
@@ -29,12 +31,14 @@ class SimpleTokenizer(tokens: String) : AbstractTokenizer() {
     override fun nextToken(): String {
         val base = tokenizer.nextToken()
         if (tokenPreprocess != null) {
-            return tokenPreprocess?.preProcess(base) ?: throw RuntimeException("error while preprocessing")
+            val tok = tokenPreprocess?.preProcess(base) ?: throw RuntimeException("error while preprocessing")
+            listOfTokens.add(tok)
+            return tok
         }
+        listOfTokens.add(base)
         return base
 
     }
-
 
 
 }

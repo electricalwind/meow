@@ -14,16 +14,13 @@ public final class Constants {
     public final static String TOKEN_NAME = "name";
 
     public final static String TOKENIZE_CONTENT_NAME = "name";
+    public final static String TOKENIZE_CONTENT_RELATION = "tokenizedContents";
 
     public final static String TOKENIZE_CONTENT_FATHER = "father";
 
     public final static String TOKENIZE_CONTENT_TOKENS = "tokens";
 
     public final static String WORD_INVERTED_INDEX_RELATION = "invertedIndex";
-
-    public final static String INVERTED_INDEX_WORD_RELATION = "word";
-
-    public final static String INVERTED_INDEX_NODE_II = "invertedIndex";
 
     public final static String NO_TYPE_TOKENIZE = "noType";
 
