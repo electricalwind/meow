@@ -1,11 +1,11 @@
 package lu.jimenez.research.mwdbtoken.utils
 
 
-class MinimunEditDistance<T : Comparable<T>>(val former: Array<T>, val newer: Array<T>) {
+class MinimunEditDistance<T : Comparable<T>>(private val former: Array<T>, private val newer: Array<T>) {
 
 
-    val minEditDistanceMatrix: Array<IntArray> = Array(newer.size + 1, { IntArray(former.size + 1) })
-    val backtraceMatrix: Array<Array<MutableList<Modification>>> = Array(newer.size + 1, { Array<MutableList<Modification>>(former.size + 1, { mutableListOf() }) })
+    private val minEditDistanceMatrix: Array<IntArray> = Array(newer.size + 1, { IntArray(former.size + 1) })
+    private val backtraceMatrix: Array<Array<MutableList<Modification>>> = Array(newer.size + 1, { Array<MutableList<Modification>>(former.size + 1, { mutableListOf() }) })
 
     init {
         computeEditDistance()
