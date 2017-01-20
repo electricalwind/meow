@@ -4,7 +4,7 @@ import lu.jimenez.research.mwdbtoken.Constants.*
 import lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.retrieveVocabularyNode
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import mu.KLogging
-import org.mwg.Constants.*
+import org.mwg.Constants.BEGINNING_OF_TIME
 import org.mwg.Type
 import org.mwg.task.Task
 import org.mwg.task.Tasks.newTask
@@ -21,7 +21,7 @@ object VocabularyTask : KLogging() {
                         newTask()
                                 .createNode()
                                 .setAttribute(ENTRY_POINT_NODE_NAME, Type.STRING, VOCABULARY_NODE_NAME)
-                                .timeSensitivity("$END_OF_TIME", "0")
+                                .timeSensitivity("-1", "0")
                                 .addToGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME)
                 ))
 
@@ -43,7 +43,7 @@ object VocabularyTask : KLogging() {
                 .flat()
     }
 
-    fun retrieveToken(): Task {
+    private fun retrieveToken(): Task {
         return newTask()
                 .defineAsVar("token")
                 .readVar("Vocabulary")
@@ -63,23 +63,13 @@ object VocabularyTask : KLogging() {
                         newTask()
                                 //Token
                                 .createNode()
-                                .timeSensitivity("$END_OF_TIME", "0")
+                                .timeSensitivity("-1", "0")
                                 .setAttribute(TOKEN_NAME, Type.STRING, "{{token}}")
                                 .defineAsVar("newToken")
                                 .readVar("Vocabulary")
                                 .addVarToRelation(VOCABULARY_TOKEN_INDEX, "newToken", TOKEN_NAME)
                                 .readVar("newToken")
-                                //invertedIndex
-                                /**.createNode()
-                                .timeSensitivity(Long.MAX_VALUE, 0)
-                                .setAttribute("name", Type.STRING, "invertedIndex")
-                                .defineAsVar("invertedIndex")
-                                .addVarToRelation(INVERTED_INDEX_WORD_RELATION, "newToken")
-                                .readVar("newToken")
-                                .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex")*/
                 ))
-
-        //}
 
     }
 

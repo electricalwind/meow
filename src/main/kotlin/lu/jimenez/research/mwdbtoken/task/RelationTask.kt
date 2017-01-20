@@ -1,7 +1,6 @@
 package lu.jimenez.research.mwdbtoken.task
 
 import lu.jimenez.research.mwdbtoken.Constants.*
-import lu.jimenez.research.mwdbtoken.task.VocabularyTask.retrieveToken
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer
 import lu.jimenez.research.mwdbtoken.utils.MinimunEditDistance
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
@@ -141,8 +140,8 @@ object RelationTask {
     private fun uocTokenizeRelation(): Task {
         return newTask()
                 .readVar(nodeVar)
-
-                .traverse(TOKENIZE_CONTENT_RELATION, TOKENIZE_CONTENT_NAME, relationVar)
+                //.println("{{result}}")
+                .traverse(TOKENIZE_CONTENT_RELATION, TOKENIZE_CONTENT_NAME, "{{$relationVar}}")
                 .then(ifEmptyThenElse(
                         createTokenRelation(),
                         updateTokenRelation()
@@ -152,7 +151,6 @@ object RelationTask {
     private fun updateTokenRelation(): Task {
         return newTask()
                 .defineAsVar("relationNode")
-                //?
                 .then(checkForFuture())
                 .thenDo { ctx ->
                     val dephasing = ctx.resultAsNodes()[0].timeDephasing()
@@ -160,20 +158,24 @@ object RelationTask {
                         ctx.endTask(ctx.result(), RuntimeException("Trying to modify a tokenize content at the time of the previous modification"))
                     else {
                         val newToken = ctx.variable(tokenizerVar)[0] as Tokenizer
-
-                        ctx.continueWith(ctx.wrap(newToken.getTokens().toTypedArray()))
+                        newTask()
+                                .pipe(VocabularyTask.getOrCreateTokensFromString(newToken.getTokens().toTypedArray()))
+                                .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD
+                                ) { res -> ctx.continueWith(res) }
                     }
-                }.map(retrieveToken())
+                }
+
+
                 .defineAsVar("newToken")
                 .readVar("relationNode")
                 .thenDo { ctx ->
                     val relationNodeId = ctx.resultAsNodes()[0].id()
                     val type = ctx.resultAsNodes()[0].get("type") as String
                     val relation = ctx.resultAsNodes()[0].get(TOKENIZE_CONTENT_TOKENS) as Relation
-                    val relationsId = relation.all()
-                    val newContent = ctx.variable("newToken").asArray() as Array<Node>
+                    val relationsId = relation.all().take(relation.size())
+                    val newContent = ctx.variable("newToken").asArray()
                     val newContentId = mutableListOf<Long>()
-                    newContent.mapTo(newContentId) { it.id() }
+                    newContent.mapTo(newContentId) { (it as Node).id() }
                     val med = MinimunEditDistance(relationsId.toTypedArray(), newContentId.toTypedArray())
                     val path = med.path()
                     var formerIndex = 0
@@ -197,7 +199,6 @@ object RelationTask {
 
                                 formerIndex++
                             }
-
 
                             MinimunEditDistance.Modification.Insertion -> {
                                 relation.insert(newIndex, action.first)
@@ -252,9 +253,6 @@ object RelationTask {
                     else
                         ctx.continueTask()
                 }
-
-
-        //TODO check for future?
     }
 
     private fun createTokenRelation(): Task {

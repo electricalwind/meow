@@ -54,4 +54,5 @@ class MinimunEditDistanceTest {
         val i = path.count { it.second == MinimunEditDistance.Modification.Suppression }
         assertEquals(edi,i)
     }
+
 }

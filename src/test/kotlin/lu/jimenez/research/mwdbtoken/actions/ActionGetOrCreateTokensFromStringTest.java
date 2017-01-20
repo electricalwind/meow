@@ -6,7 +6,7 @@ import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-import static lu.jimenez.research.mwdbtoken.Constants.TOKEN_NAME;
+import static lu.jimenez.research.mwdbtoken.Constants.*;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.getOrCreateTokensFromString;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.initializeVocabulary;
 import static org.junit.Assert.assertEquals;
@@ -198,6 +198,64 @@ public class ActionGetOrCreateTokensFromStringTest extends ActionTest {
                 //.addHook(new VerboseHook())
                 .execute(graph, null);
         assertEquals(counter,i[0]);
+        removeGraph();
+    }
+
+
+    @Test
+    public void createOneTime() {
+        int counter = 1;
+        final int[] i = {0};
+        initGraph();
+        newTask().travelInTime("0")
+                .then(initializeVocabulary())
+                .defineAsVar("voc")
+                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, VOCABULARY_NODE_NAME)
+                .println("{{result}}")
+                .then(getOrCreateTokensFromString("Token7"))
+                .readVar("voc")
+                .println("{{result}}")
+                /**.thenDo(new ActionFunction() {
+                    @Override
+                    public void eval(TaskContext ctx) {
+                        System.out.println(ctx.variable("voc").get(0));
+                        ((Node)ctx.variable("voc").get(0)).timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
+                            @Override
+                            public void on(long[] result) {
+                                for(int i=0;i<result.length;i++){
+                                    graph.lookup(0, result[i], ((Node) ctx.variable("voc").get(0)).id(), new Callback<Node>() {
+                                        @Override
+                                        public void on(Node result) {
+                                            System.out.println(result);
+                                        }
+                                    });
+                                }
+
+                                System.out.println(Arrays.toString(result));
+                            }
+                        });
+                        ctx.continueTask();
+                    }
+                })*/
+                .travelInTime("1")
+
+
+                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, VOCABULARY_NODE_NAME)
+                .println("{{result}}")
+                .then(getOrCreateTokensFromString("Token8"))
+                .thenDo(new ActionFunction() {
+                    public void eval(TaskContext ctx) {
+                        TaskResult<Node> tok = ctx.resultAsNodes();
+                        assertEquals(1, tok.size());
+                        Node n = tok.get(0);
+                        assertEquals("Token8", n.get(TOKEN_NAME));
+                        i[0]++;
+                        ctx.continueTask();
+                    }
+                })
+                //.addHook(new VerboseHook())
+                .execute(graph, null);
+        //assertEquals(counter,i[0]);
         removeGraph();
     }
 
