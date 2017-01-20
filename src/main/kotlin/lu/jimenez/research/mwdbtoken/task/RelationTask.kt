@@ -3,10 +3,12 @@ package lu.jimenez.research.mwdbtoken.task
 import lu.jimenez.research.mwdbtoken.Constants.*
 import lu.jimenez.research.mwdbtoken.task.VocabularyTask.retrieveToken
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer
+import lu.jimenez.research.mwdbtoken.utils.MinimunEditDistance
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import org.mwg.*
 import org.mwg.Constants.BEGINNING_OF_TIME
 import org.mwg.plugin.SchedulerAffinity
+import org.mwg.struct.Relation
 import org.mwg.task.Task
 import org.mwg.task.Tasks.*
 
@@ -155,13 +157,101 @@ object RelationTask {
                 .thenDo { ctx ->
                     val dephasing = ctx.resultAsNodes()[0].timeDephasing()
                     if (dephasing == 0L)
-                        ctx.endTask(ctx.result(),RuntimeException("Trying to modify a tokenize content at the time of the previous modification"))
-                    else{
-                        val newToken  = ctx.variable(tokenizerVar)[0] as Tokenizer
+                        ctx.endTask(ctx.result(), RuntimeException("Trying to modify a tokenize content at the time of the previous modification"))
+                    else {
+                        val newToken = ctx.variable(tokenizerVar)[0] as Tokenizer
 
                         ctx.continueWith(ctx.wrap(newToken.getTokens().toTypedArray()))
                     }
                 }.map(retrieveToken())
+                .defineAsVar("newToken")
+                .readVar("relationNode")
+                .thenDo { ctx ->
+                    val relationNodeId = ctx.resultAsNodes()[0].id()
+                    val type = ctx.resultAsNodes()[0].get("type") as String
+                    val relation = ctx.resultAsNodes()[0].get(TOKENIZE_CONTENT_TOKENS) as Relation
+                    val relationsId = relation.all()
+                    val newContent = ctx.variable("newToken").asArray() as Array<Node>
+                    val newContentId = mutableListOf<Long>()
+                    newContent.mapTo(newContentId) { it.id() }
+                    val med = MinimunEditDistance(relationsId.toTypedArray(), newContentId.toTypedArray())
+                    val path = med.path()
+                    var formerIndex = 0
+                    var newIndex = 0
+                    val formerIndexMax = relationsId.size
+                    val newIndexMax = newContentId.size
+                    for (action in path) {
+                        when (action.second) {
+                            MinimunEditDistance.Modification.Suppression -> {
+                                relation.delete(newIndex)
+                                newTask().lookup("${action.first}")
+                                        .traverse(WORD_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
+                                        .thenDo {
+                                            ctx ->
+                                            val node = ctx.resultAsNodes()[0]
+                                            val position: MutableList<Int> = (node.get("position") as IntArray?)?.toMutableList() ?: throw RuntimeException("no position while delete")
+                                            position.remove(formerIndex)
+                                            node.set("position", Type.INT_ARRAY, position.toIntArray())
+                                            ctx.continueTask()
+                                        }
+
+                                formerIndex++
+                            }
+
+
+                            MinimunEditDistance.Modification.Insertion -> {
+                                relation.insert(newIndex, action.first)
+                                newTask().lookup("${action.first}")
+                                        .traverse(WORD_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
+                                        .then(
+                                                ifEmptyThen(
+                                                        newTask()
+                                                                .then(
+                                                                        executeAtWorldAndTime("0", "$BEGINNING_OF_TIME",
+                                                                                newTask()
+                                                                                        .createNode()
+                                                                                        .setAttribute("id", Type.LONG, "$relationNodeId")
+                                                                                        .setAttribute("type", Type.STRING, "$type")
+                                                                                        .defineAsVar("invertedIndex")
+                                                                                        .readVar("token")
+                                                                                        .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex", "id")
+                                                                                        .readVar("invertedIndex")
+                                                                        )
+                                                                )
+                                                )
+                                        )
+                                        .thenDo {
+                                            ctx ->
+                                            val node = ctx.resultAsNodes()[0]
+                                            val position: MutableList<Int> = (node.get("position") as IntArray?)?.toMutableList() ?: mutableListOf<Int>()
+                                            position.add(newIndex)
+                                            node.set("position", Type.INT_ARRAY, position.toIntArray())
+                                            ctx.continueTask()
+                                        }.executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD, {})
+                                newIndex++
+                            }
+
+                            MinimunEditDistance.Modification.Keep -> {
+                                newTask().lookup("${action.first}")
+                                        .traverse(WORD_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
+                                        .thenDo { ctx ->
+                                            val node = ctx.resultAsNodes()[0]
+                                            val position: MutableList<Int> = (node.get("position") as IntArray?)?.toMutableList() ?: mutableListOf<Int>()
+                                            position.remove(formerIndex)
+                                            position.add(newIndex)
+                                            node.set("position", Type.INT_ARRAY, position.toIntArray())
+                                            ctx.continueTask()
+                                        }
+                                formerIndex++
+                                newIndex++
+                            }
+                        }
+                    }
+                    if (formerIndex != formerIndexMax || newIndex != newIndexMax)
+                        ctx.endTask(ctx.result(), RuntimeException("error while computing the edit distance"))
+                    else
+                        ctx.continueTask()
+                }
 
 
         //TODO check for future?
