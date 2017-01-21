@@ -21,6 +21,7 @@ public final class Constants {
     public final static String TOKENIZE_CONTENT_TOKENS = "tokens";
 
     public final static String WORD_INVERTED_INDEX_RELATION = "invertedIndex";
+    public final static String INVERTED_WORD_INDEX_RELATION = "token";
 
     public final static String NO_TYPE_TOKENIZE = "noType";
 

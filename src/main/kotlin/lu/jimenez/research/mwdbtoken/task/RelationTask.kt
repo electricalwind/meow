@@ -203,6 +203,7 @@ object RelationTask {
                             MinimunEditDistance.Modification.Insertion -> {
                                 relation.insert(newIndex, action.first)
                                 newTask().lookup("${action.first}")
+                                        .defineAsVar("token")
                                         .traverse(WORD_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
                                         .then(
                                                 ifEmptyThen(
@@ -214,6 +215,7 @@ object RelationTask {
                                                                                         .setAttribute("id", Type.LONG, "$relationNodeId")
                                                                                         .setAttribute("type", Type.STRING, "$type")
                                                                                         .defineAsVar("invertedIndex")
+                                                                                        .addVarToRelation(INVERTED_WORD_INDEX_RELATION,"token")
                                                                                         .readVar("token")
                                                                                         .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex", "id")
                                                                                         .readVar("invertedIndex")
@@ -294,6 +296,7 @@ object RelationTask {
 
                                                                         .setAttribute("type", Type.STRING, "{{type}}")
                                                                         .defineAsVar("invertedIndex")
+                                                                        .addVarToRelation(INVERTED_WORD_INDEX_RELATION,"token")
                                                                         .readVar("token")
                                                                         .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex", "id")
                                                                         .readVar("invertedIndex")
