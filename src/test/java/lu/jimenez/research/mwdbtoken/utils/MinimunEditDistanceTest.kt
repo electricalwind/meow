@@ -1,7 +1,8 @@
 package lu.jimenez.research.mwdbtoken.utils
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
+
 
 
 class MinimunEditDistanceTest {

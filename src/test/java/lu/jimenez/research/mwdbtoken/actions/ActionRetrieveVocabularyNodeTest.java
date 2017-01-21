@@ -10,7 +10,7 @@ import static lu.jimenez.research.mwdbtoken.Constants.ENTRY_POINT_NODE_NAME;
 import static lu.jimenez.research.mwdbtoken.Constants.VOCABULARY_NODE_NAME;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.initializeVocabulary;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.retrieveVocabularyNode;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 
 public class ActionRetrieveVocabularyNodeTest extends ActionTest {

@@ -15,7 +15,7 @@ import static lu.jimenez.research.mwdbtoken.Constants.ENTRY_POINT_INDEX;
 import static lu.jimenez.research.mwdbtoken.Constants.TOKENIZE_CONTENT_NAME;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.initializeVocabulary;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.tokenizeStringsUsingTokenizer;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 import static org.mwg.task.Tasks.thenDo;
 

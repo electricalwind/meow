@@ -9,8 +9,8 @@ import org.mwg.task.TaskResult;
 import static lu.jimenez.research.mwdbtoken.Constants.*;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.getOrCreateTokensFromString;
 import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.initializeVocabulary;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mwg.task.Tasks.newTask;
 
 public class ActionGetOrCreateTokensFromStringTest extends ActionTest {
