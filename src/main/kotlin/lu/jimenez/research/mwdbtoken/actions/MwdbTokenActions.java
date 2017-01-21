@@ -19,4 +19,9 @@ public class MwdbTokenActions {
     public static Action tokenizeStringsUsingTokenizer(String tokenizer, String preprocessor,String type, String... toTokenize){
         return new ActionTokenizeStringsUsingTokenizer(tokenizer,preprocessor,type,toTokenize);
     }
+
+
+    public static Action uocTokenizeRelationsToNodes(String tokenizersVar, String nodesVar, String... relationList){
+        return new ActionCreateOrUpdateTokenizeRelationsToNodes(tokenizersVar,nodesVar,relationList);
+    }
 }

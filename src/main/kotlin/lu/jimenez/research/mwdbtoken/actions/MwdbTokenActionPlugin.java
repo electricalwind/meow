@@ -61,6 +61,19 @@ public class MwdbTokenActionPlugin implements Plugin {
                     }
                 });
 
+        graph.actionRegistry()
+                .declaration(MwdbTokenActionNames.CREATE_OR_UPDATE_TOKENIZE_RELATIONS_TO_NODES)
+                .setParams(Type.STRING, Type.STRING, Type.STRING_ARRAY)
+                .setDescription("update or create a tokenized Content relation in one or several nodes with the given index")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        if (params[2] != null) {
+                            return uocTokenizeRelationsToNodes((String) params[0], (String) params[1], (String[]) params[2]);
+                        } else return null;
+                    }
+                });
+
 
     }
 
