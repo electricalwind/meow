@@ -195,7 +195,7 @@ object RelationTask {
                                             position.remove(formerIndex)
                                             node.set("position", Type.INT_ARRAY, position.toIntArray())
                                             ctx.continueTask()
-                                        }
+                                        }.executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD, {})
 
                                 formerIndex++
                             }
@@ -215,7 +215,7 @@ object RelationTask {
                                                                                         .setAttribute("id", Type.LONG, "$relationNodeId")
                                                                                         .setAttribute("type", Type.STRING, "$type")
                                                                                         .defineAsVar("invertedIndex")
-                                                                                        .addVarToRelation(INVERTED_WORD_INDEX_RELATION,"token")
+                                                                                        .addVarToRelation(INVERTED_WORD_INDEX_RELATION, "token")
                                                                                         .readVar("token")
                                                                                         .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex", "id")
                                                                                         .readVar("invertedIndex")
@@ -244,7 +244,7 @@ object RelationTask {
                                             position.add(newIndex)
                                             node.set("position", Type.INT_ARRAY, position.toIntArray())
                                             ctx.continueTask()
-                                        }
+                                        }.executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD, {})
                                 formerIndex++
                                 newIndex++
                             }
@@ -296,7 +296,7 @@ object RelationTask {
 
                                                                         .setAttribute("type", Type.STRING, "{{type}}")
                                                                         .defineAsVar("invertedIndex")
-                                                                        .addVarToRelation(INVERTED_WORD_INDEX_RELATION,"token")
+                                                                        .addVarToRelation(INVERTED_WORD_INDEX_RELATION, "token")
                                                                         .readVar("token")
                                                                         .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex", "id")
                                                                         .readVar("invertedIndex")
