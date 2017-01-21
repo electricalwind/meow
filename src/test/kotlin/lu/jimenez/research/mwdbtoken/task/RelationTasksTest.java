@@ -58,7 +58,7 @@ public class RelationTasksTest extends TaskTest {
     public static String text1 = "the apple was looking over the cloud";
     public static String text2 = "an orange was riding a skateboard";
     public static String text3 = "this may have no sense";
-    public static String text11= "an ordinary apple was looking at a cloud";
+    public static String text11 = "an ordinary apple was looking at a cloud";
 
     @Test
     public void testcreation1WithType() {
@@ -478,14 +478,14 @@ public class RelationTasksTest extends TaskTest {
                 .readGlobalIndex(ENTRY_POINT_INDEX, "name", "root")
                 .defineAsVar("nodevar")
                 .pipe(RelationTask.updateOrCreateTokenizeRelationsToNodes("tokenizer", "nodevar", new String[]{"text1"}))
-
+                .traverse("tokenizedContents")
+                .println("{{result}}")
                 .travelInTime("1")
                 .then(tokenizeStringsUsingTokenizer("default", null, "true", "my type", text11))
                 .defineAsVar("tokenizer")
                 .readGlobalIndex(ENTRY_POINT_INDEX, "name", "root")
                 .defineAsVar("nodevar")
                 .pipe(RelationTask.updateOrCreateTokenizeRelationsToNodes("tokenizer", "nodevar", new String[]{"text1"}))
-                .println("{{result}}")
                 .traverse("tokenizedContents")
                 .thenDo(new ActionFunction() {
                     public void eval(TaskContext ctx) {
@@ -500,7 +500,6 @@ public class RelationTasksTest extends TaskTest {
                         ctx.continueTask();
                     }
                 })
-                .println("rrrrr")
                 .traverse("tokens")
                 .forEach(
                         newTask()
@@ -512,27 +511,162 @@ public class RelationTasksTest extends TaskTest {
                                     }
                                 })
                 )
-                .println("rrrrr")
+
                 //.flat()
                 //.addHook(VerboseHook())*/
                 .execute(graph, null);
-        //assertEquals(15, counter[0]);
+        assertEquals(9, counter[0]);
         removeGraph();
     }
 
 
     @Test
     public void testupdate2() {
+        initGraph();
+        final int[] counter = {0};
+        TokenizerFactory tf = new TokenizerFactory("");
+        final Tokenizer tokenizer = tf.create(text11, null);
 
-    }
 
-    @Test
-    public void testupdate3() {
-
+        newTask()
+                .travelInTime("0")
+                .then(initializeVocabulary())
+                .then(tokenizeStringsUsingTokenizer("default", null, "true", "my type", text1))
+                .defineAsVar("tokenizer")
+                .declareVar("nodevar")
+                .loop("0", "2",
+                        newTask()
+                                .createNode()
+                                .setAttribute("name", Type.STRING, "{{i}}")
+                                .addToVar("nodevar")
+                )
+                .pipe(RelationTask.updateOrCreateTokenizeRelationsToNodes("tokenizer", "nodevar", new String[]{"text0", "text1", "text2"}))
+                .readVar("nodevar")
+                .travelInTime("1")
+                .defineAsVar("nodevar")
+                .then(tokenizeStringsUsingTokenizer("default", null, "true", "my type", text11))
+                .defineAsVar("tokenizer")
+                .pipe(RelationTask.updateOrCreateTokenizeRelationsToNodes("tokenizer", "nodevar", new String[]{"text0", "text1", "text2"}))
+                .traverse("tokenizedContents")
+                .thenDo(new ActionFunction() {
+                    public void eval(TaskContext ctx) {
+                        assertEquals(3, ctx.resultAsNodes().size());
+                        assertEquals("text0", ctx.resultAsNodes().get(0).get(TOKENIZE_CONTENT_NAME));
+                        assertEquals("text1", ctx.resultAsNodes().get(1).get(TOKENIZE_CONTENT_NAME));
+                        assertEquals("text2", ctx.resultAsNodes().get(2).get(TOKENIZE_CONTENT_NAME));
+                        assertEquals("my type", ctx.resultAsNodes().get(0).get("type"));
+                        ctx.resultAsNodes().get(1).relation("tokens", new Callback<Node[]>() {
+                            public void on(Node[] result) {
+                                assertEquals(8, result.length);
+                            }
+                        });
+                        counter[0]++;
+                        ctx.continueTask();
+                    }
+                })
+                .traverse("tokens")
+                .forEach(
+                        newTask()
+                                .thenDo(new ActionFunction() {
+                                    public void eval(TaskContext ctx) {
+                                        assertEquals(
+                                                tokenizer
+                                                        .getTokens()
+                                                        .get((int) ctx.variable("i").get(0) % 8), ctx.resultAsNodes().get(0).get("name"));
+                                        counter[0]++;
+                                        ctx.continueTask();
+                                    }
+                                })
+                                .traverse("invertedIndex")
+                                .thenDo(new ActionFunction() {
+                                    public void eval(TaskContext ctx) {
+                                        assertEquals("my type", ctx.resultAsNodes().get(0).get("type"));
+                                        int i = (Integer) ctx.variable("i").get(0) % 8;
+                                        System.out.println(i);
+                                        assert (IntStream.of((int[]) ctx.resultAsNodes().get(0).get("position")).anyMatch(x -> x == i));
+                                        counter[0]++;
+                                        ctx.continueTask();
+                                    }
+                                })
+                )
+                //.flat()
+                //.addHook(VerboseHook())
+                .execute(graph, null);
+        assertEquals(49, counter[0]);
+        removeGraph();
     }
 
     @Test
     public void testupdate4() {
+        initGraph();
+        final int[] counter = {0};
+        TokenizerFactory tf = new TokenizerFactory("");
+        //final Tokenizer tokenizer2 = tf.create(text11, null);
 
+        newTask()
+                .travelInTime("0")
+                .then(initializeVocabulary())
+                .then(tokenizeStringsUsingTokenizer("default", null, "true", "my type", text1))
+                .defineAsVar("tokenizer")
+                .then(tokenizeStringsUsingTokenizer("default", null, "true", "my type", text2))
+                .addToVar("tokenizer")
+                .readGlobalIndex(ENTRY_POINT_INDEX, "name", "root")
+                .defineAsVar("nodevar")
+                .pipe(RelationTask.updateOrCreateTokenizeRelationsToNodes("tokenizer", "nodevar", new String[]{"text1", "text2"}))
+                .readVar("nodevar")
+                .travelInTime("1")
+                .defineAsVar("nodevar")
+                .then(tokenizeStringsUsingTokenizer("default", null, "true", "my type", text3))
+                .defineAsVar("tokenizer")
+                .then(tokenizeStringsUsingTokenizer("default", null, "true", "my type", text11))
+                .addToVar("tokenizer")
+                .pipe(RelationTask.updateOrCreateTokenizeRelationsToNodes("tokenizer", "nodevar", new String[]{"text1", "text2"}))
+                .thenDo(new ActionFunction() {
+                    public void eval(TaskContext ctx) {
+                        ctx.resultAsNodes().get(0).relation("tokenizedContents", new Callback<Node[]>() {
+                            public void on(Node[] result) {
+                                assertEquals(2, result.length);
+                            }
+                        });
+                        counter[0]++;
+                        ctx.continueTask();
+                    }
+                })
+                .defineAsVar("res")
+                .traverse("tokenizedContents", TOKENIZE_CONTENT_NAME, "text1")
+                .thenDo(new ActionFunction() {
+                    @Override
+                    public void eval(TaskContext ctx) {
+                        assertEquals("text1", ctx.resultAsNodes().get(0).get(TOKENIZE_CONTENT_NAME));
+                        assertEquals("my type", ctx.resultAsNodes().get(0).get("type"));
+                        ctx.resultAsNodes().get(0).relation("tokens", new Callback<Node[]>() {
+                            public void on(Node[] result) {
+                                assertEquals(5, result.length);
+                            }
+                        });
+                        counter[0]++;
+                        ctx.continueTask();
+                    }
+                })
+                .readVar("res")
+                .traverse("tokenizedContents", TOKENIZE_CONTENT_NAME, "text2")
+                .thenDo(new ActionFunction() {
+                    @Override
+                    public void eval(TaskContext ctx) {
+                        assertEquals("text2", ctx.resultAsNodes().get(0).get(TOKENIZE_CONTENT_NAME));
+                        assertEquals("my type", ctx.resultAsNodes().get(0).get("type"));
+                        ctx.resultAsNodes().get(0).relation("tokens", new Callback<Node[]>() {
+                            public void on(Node[] result) {
+                                assertEquals(8, result.length);
+                            }
+                        });
+                        counter[0]++;
+                        ctx.continueTask();
+                    }
+                })
+                .execute(graph, null);
+        assertEquals(3, counter[0]);
+        removeGraph();
     }
+
 }
