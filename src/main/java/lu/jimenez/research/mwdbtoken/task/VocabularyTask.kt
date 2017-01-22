@@ -34,6 +34,27 @@ object VocabularyTask : KLogging() {
     }
 
     @JvmStatic
+    fun rebuildingTokenizeContent(tokenizedContentsVar : String):Task{
+        return newTask()
+                .readVar(tokenizedContentsVar)
+                .map(
+                        newTask()
+                                .defineAsVar("tokenizeContent")
+                                .thenDo { ctx ->
+                                    val tokenizedContentNode = ctx.resultAsNodes()[0]
+                                    tokenizedContentNode.relation(TOKENIZE_CONTENT_TOKENS,{nodeArray ->
+                                        val content = nodeArray.map { node -> node.get(TOKEN_NAME) as String }.joinToString(separator = " ")
+                                        val type = tokenizedContentNode.get("type")
+                                        val name = tokenizedContentNode.get(TOKENIZE_CONTENT_NAME)
+                                        ctx.continueWith(ctx.wrap(arrayOf(name,type,content)))
+                                    })
+                        }
+                )
+
+    }
+
+
+    @JvmStatic
     fun getOrCreateTokensFromString(tokens: Array<String>): Task {
         return newTask()
                 .then(retrieveVocabularyNode())
@@ -72,5 +93,6 @@ object VocabularyTask : KLogging() {
                 ))
 
     }
+
 
 }

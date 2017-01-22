@@ -74,6 +74,17 @@ public class MwdbTokenActionPlugin implements Plugin {
                     }
                 });
 
+        graph.actionRegistry()
+                .declaration(MwdbTokenActionNames.REBUILDING_TOKENIZE_CONTENTS)
+                .setParams(Type.STRING)
+                .setDescription("Rebuild the tokenized content present in a var in a String using space, 3 results are present per tokenizeContents, 1) name, 2)type, 3) Content ")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        return rebuildingTokenizedContents((String) params[0]);
+                    }
+                });
+
 
     }
 
