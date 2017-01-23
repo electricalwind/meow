@@ -1,6 +1,5 @@
 package lu.jimenez.research.mwdbtoken.nlp.ngram.actions;
 
-import lu.jimenez.research.mwdbtoken.core.exception.UnitializeVocabularyException;
 import lu.jimenez.research.mwdbtoken.nlp.ngram.exception.UninitializeNgramMainNodeException;
 import lu.jimenez.research.mwdbtoken.nlp.ngram.task.NgramTask;
 import org.mwg.Callback;
@@ -20,7 +19,7 @@ public class ActionRetrieveNgramMainNode implements Action {
                             public void on(TaskResult res) {
                                 if (res != null) {
                                     if (res.size() == 0) {
-                                        ctx.endTask(res, new UnitializeVocabularyException());
+                                        ctx.endTask(res, new UninitializeNgramMainNodeException());
                                     } else {
                                         if (res.output() != null) {
                                             ctx.append(res.output());

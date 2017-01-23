@@ -1,16 +1,17 @@
-package lu.jimenez.research.mwdbtoken.core.actions;
+package lu.jimenez.research.mwdbtoken.nlp.ngram.actions;
 
 import org.junit.jupiter.api.Test;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 
-import static lu.jimenez.research.mwdbtoken.core.CoreConstants.*;
-import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.initializeVocabulary;
+import static lu.jimenez.research.mwdbtoken.core.CoreConstants.ENTRY_POINT_INDEX;
+import static lu.jimenez.research.mwdbtoken.core.CoreConstants.ENTRY_POINT_NODE_NAME;
+import static lu.jimenez.research.mwdbtoken.nlp.ngram.NgramConstants.NGRAM_NODE_NAME;
+import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.initializeNgram;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 
-public class ActionInitializeVocabularyTest extends ActionTest {
-
+class ActionInitializeNgramTest extends ActionTest {
     @Test
     public void test() {
         int counter = 1;
@@ -18,8 +19,8 @@ public class ActionInitializeVocabularyTest extends ActionTest {
         initGraph();
         newTask()
                 .travelInTime("0")
-                .then(initializeVocabulary())
-                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, VOCABULARY_NODE_NAME)
+                .then(initializeNgram())
+                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, NGRAM_NODE_NAME)
                 .thenDo(new ActionFunction() {
                             public void eval(TaskContext context) {
                                 assertEquals(context.resultAsNodes().size(), 1);
@@ -40,9 +41,9 @@ public class ActionInitializeVocabularyTest extends ActionTest {
         initGraph();
         newTask()
                 .travelInTime("0")
-                .then(initializeVocabulary())
+                .then(initializeNgram())
                 .travelInTime("1")
-                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, VOCABULARY_NODE_NAME)
+                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, NGRAM_NODE_NAME)
                 .thenDo(new ActionFunction() {
                             public void eval(TaskContext context) {
                                 assertEquals(context.resultAsNodes().size(), 1);
