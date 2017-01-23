@@ -11,4 +11,12 @@ public class MwdbNgramActions {
     public static Action retrieveNgramMainNode() {
         return new ActionRetrieveNgramMainNode();
     }
+
+    public static Action getOrCreateNgramFromString(String... grams) {
+        return new ActionGetOrCreateNgramFromString(grams);
+    }
+
+    public static Action getOrCreateNgramFromVar(String var) {
+        return new ActionGetOrCreateTokenFromVar(var);
+    }
 }

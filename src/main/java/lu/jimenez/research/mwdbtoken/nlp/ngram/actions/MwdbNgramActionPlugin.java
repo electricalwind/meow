@@ -1,12 +1,12 @@
 package lu.jimenez.research.mwdbtoken.nlp.ngram.actions;
 
 import org.mwg.Graph;
+import org.mwg.Type;
 import org.mwg.plugin.ActionFactory;
 import org.mwg.plugin.Plugin;
 import org.mwg.task.Action;
 
-import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.initializeNgram;
-import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.retrieveNgramMainNode;
+import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.*;
 
 public class MwdbNgramActionPlugin implements Plugin {
     @Override
@@ -30,6 +30,30 @@ public class MwdbNgramActionPlugin implements Plugin {
                     @Override
                     public Action create(Object[] params) {
                         return retrieveNgramMainNode();
+                    }
+                });
+
+        graph.actionRegistry()
+                .declaration(MwdbNgramActionNames.GET_OR_CREATE_NGRAM_FROM_VAR)
+                .setParams(Type.STRING)
+                .setDescription("get or create a n gram corresponding to the tokens store in the given var")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        return getOrCreateNgramFromVar((String) params[0]);
+                    }
+                });
+
+        graph.actionRegistry()
+                .declaration(MwdbNgramActionNames.GET_OR_CREATE_NGRAM_FROM_STRING)
+                .setParams(Type.STRING_ARRAY)
+                .setDescription("get or create a n gram corresponding to the gram given")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        if (params[0] != null)
+                            return getOrCreateNgramFromString((String[]) params[0]);
+                        else return null;
                     }
                 });
     }
