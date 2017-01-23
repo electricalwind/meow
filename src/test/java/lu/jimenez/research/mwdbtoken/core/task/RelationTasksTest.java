@@ -1,4 +1,4 @@
-package lu.jimenez.research.mwdbtoken.task;
+package lu.jimenez.research.mwdbtoken.core.task;
 
 import lu.jimenez.research.mwdbtoken.tokenization.TokenizerFactory;
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer;
@@ -11,10 +11,10 @@ import org.mwg.task.TaskContext;
 
 import java.util.stream.IntStream;
 
-import static lu.jimenez.research.mwdbtoken.Constants.ENTRY_POINT_INDEX;
-import static lu.jimenez.research.mwdbtoken.Constants.TOKENIZE_CONTENT_NAME;
-import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.initializeVocabulary;
-import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.tokenizeStringsUsingTokenizer;
+import static lu.jimenez.research.mwdbtoken.core.Constants.ENTRY_POINT_INDEX;
+import static lu.jimenez.research.mwdbtoken.core.Constants.TOKENIZE_CONTENT_NAME;
+import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.initializeVocabulary;
+import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.tokenizeStringsUsingTokenizer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 import static org.mwg.task.Tasks.thenDo;
@@ -666,6 +666,71 @@ public class RelationTasksTest extends TaskTest {
                 })
                 .execute(graph, null);
         assertEquals(3, counter[0]);
+        removeGraph();
+    }
+
+
+    @Test
+    public void testupdate1Offheap() {
+        initGraphO();
+        final int[] counter = {0};
+        TokenizerFactory tf = new TokenizerFactory("");
+        final Tokenizer tokenizer = tf.create(text1, null);
+        final Tokenizer tokenizer2 = tf.create(text11, null);
+
+        newTask()
+                .travelInTime("0")
+                .then(initializeVocabulary())
+                .then(tokenizeStringsUsingTokenizer("default", null, "true", "my type", text1))
+                .defineAsVar("tokenizer")
+                .println("coucou")
+                .readGlobalIndex(ENTRY_POINT_INDEX, "name", "root")
+                .defineAsVar("nodevar")
+                .pipe(RelationTask.updateOrCreateTokenizeRelationsToNodes("tokenizer", "nodevar", new String[]{"text1"}))
+                .traverse("tokenizedContents")
+                .println("{{result}}")
+                .travelInTime("1")
+                .then(tokenizeStringsUsingTokenizer("default", null, "true", "my type", text11))
+                .defineAsVar("tokenizer")
+                .readGlobalIndex(ENTRY_POINT_INDEX, "name", "root")
+                .defineAsVar("nodevar")
+                .pipe(RelationTask.updateOrCreateTokenizeRelationsToNodes("tokenizer", "nodevar", new String[]{"text1"}))
+                .traverse("tokenizedContents")
+                .thenDo(new ActionFunction() {
+                    public void eval(TaskContext ctx) {
+                        assertEquals(1, ctx.resultAsNodes().size());
+                        assertEquals("text1", ctx.resultAsNodes().get(0).get(TOKENIZE_CONTENT_NAME));
+                        ctx.resultAsNodes().get(0).relation("tokens", new Callback<Node[]>() {
+                            public void on(Node[] result) {
+                                assertEquals(8, result.length);
+                            }
+                        });
+                        counter[0]++;
+                        ctx.continueTask();
+                    }
+                })
+                .traverse("tokens")
+                .thenDo(new ActionFunction() {
+                    @Override
+                    public void eval(TaskContext ctx) {
+                        ctx.continueTask();
+                    }
+                })
+                .forEach(
+                        newTask()
+                                .thenDo(new ActionFunction() {
+                                    public void eval(TaskContext ctx) {
+                                        assertEquals(tokenizer2.nextToken(), ctx.resultAsNodes().get(0).get("name"));
+                                        counter[0]++;
+                                        ctx.continueTask();
+                                    }
+                                })
+                )
+
+                //.flat()
+                //.addHook(VerboseHook())*/
+                .execute(graph, null);
+        //assertEquals(9, counter[0]);
         removeGraph();
     }
 

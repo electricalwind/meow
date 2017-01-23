@@ -1,6 +1,6 @@
 package lu.jimenez.research.mwdbtoken.tokenization
 
-import lu.jimenez.research.mwdbtoken.Constants
+import lu.jimenez.research.mwdbtoken.core.Constants
 import lu.jimenez.research.mwdbtoken.tokenization.preprocessor.TokenPreprocessor
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.*
 

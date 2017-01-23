@@ -1,24 +1,16 @@
-package lu.jimenez.research.mwdbtoken.actions;
+package lu.jimenez.research.mwdbtoken.core.actions;
 
-import lu.jimenez.research.mwdbtoken.task.VocabularyTask;
+import lu.jimenez.research.mwdbtoken.core.task.VocabularyTask;
 import org.mwg.Callback;
 import org.mwg.Constants;
-import org.mwg.internal.task.TaskHelper;
 import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-public class ActionGetOrCreateTokensFromString implements Action {
-
-    private final String[] _tokenString;
-
-    public ActionGetOrCreateTokensFromString(final String... p_tokenString) {
-        this._tokenString = p_tokenString;
-    }
-
+public class ActionInitializeVocabulary implements Action {
     public void eval(final TaskContext ctx) {
-        VocabularyTask.getOrCreateTokensFromString(_tokenString)
+        VocabularyTask.initializeVocabulary()
                 .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD,
                         new Callback<TaskResult>() {
                             public void on(TaskResult res) {
@@ -41,11 +33,8 @@ public class ActionGetOrCreateTokensFromString implements Action {
     }
 
     public void serialize(StringBuilder builder) {
-        builder.append(MwdbTokenActionNames.GET_OR_CREATE_TOKENS_FROM_STRING);
+        builder.append(MwdbTokenActionNames.INITIALIZE_VOCABULARY);
         builder.append(Constants.TASK_PARAM_OPEN);
-        if (_tokenString != null && _tokenString.length > 0) {
-            TaskHelper.serializeStringParams(_tokenString, builder);
-        }
         builder.append(Constants.TASK_PARAM_CLOSE);
     }
 
@@ -55,5 +44,4 @@ public class ActionGetOrCreateTokensFromString implements Action {
         serialize(res);
         return res.toString();
     }
-
 }

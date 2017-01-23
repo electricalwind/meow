@@ -1,4 +1,4 @@
-package lu.jimenez.research.mwdbtoken.actions;
+package lu.jimenez.research.mwdbtoken.core.actions;
 
 import org.mwg.Graph;
 import org.mwg.Type;
@@ -6,7 +6,7 @@ import org.mwg.plugin.ActionFactory;
 import org.mwg.plugin.Plugin;
 import org.mwg.task.Action;
 
-import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.*;
+import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.*;
 
 public class MwdbTokenActionPlugin implements Plugin {
 

@@ -1,7 +1,7 @@
-package lu.jimenez.research.mwdbtoken.task
+package lu.jimenez.research.mwdbtoken.core.task
 
-import lu.jimenez.research.mwdbtoken.Constants.*
-import lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.retrieveVocabularyNode
+import lu.jimenez.research.mwdbtoken.core.Constants.*
+import lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.retrieveVocabularyNode
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import mu.KLogging
 import org.mwg.Constants.BEGINNING_OF_TIME

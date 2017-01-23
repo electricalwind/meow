@@ -1,6 +1,6 @@
-package lu.jimenez.research.mwdbtoken.actions;
+package lu.jimenez.research.mwdbtoken.core.actions;
 
-import lu.jimenez.research.mwdbtoken.task.RelationTask;
+import lu.jimenez.research.mwdbtoken.core.task.VocabularyTask;
 import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.internal.task.TaskHelper;
@@ -9,21 +9,16 @@ import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-public class ActionCreateOrUpdateTokenizeRelationsToNodes implements Action {
+public class ActionGetOrCreateTokensFromString implements Action {
 
-    private final String _tokenizersVar;
-    private final String _nodesVar;
-    private final String[] _relationList;
+    private final String[] _tokenString;
 
-    public ActionCreateOrUpdateTokenizeRelationsToNodes(String p_tokenizersVar, String p_nodesVar, String... p_relationList) {
-        this._tokenizersVar = p_tokenizersVar;
-        this._nodesVar = p_nodesVar;
-        this._relationList = p_relationList;
+    public ActionGetOrCreateTokensFromString(final String... p_tokenString) {
+        this._tokenString = p_tokenString;
     }
 
-    @Override
-    public void eval(TaskContext ctx) {
-        RelationTask.updateOrCreateTokenizeRelationsToNodes(_tokenizersVar, _nodesVar, _relationList)
+    public void eval(final TaskContext ctx) {
+        VocabularyTask.getOrCreateTokensFromString(_tokenString)
                 .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD,
                         new Callback<TaskResult>() {
                             public void on(TaskResult res) {
@@ -45,19 +40,13 @@ public class ActionCreateOrUpdateTokenizeRelationsToNodes implements Action {
                         });
     }
 
-    @Override
     public void serialize(StringBuilder builder) {
-        builder.append(MwdbTokenActionNames.CREATE_OR_UPDATE_TOKENIZE_RELATIONS_TO_NODES);
+        builder.append(MwdbTokenActionNames.GET_OR_CREATE_TOKENS_FROM_STRING);
         builder.append(Constants.TASK_PARAM_OPEN);
-        TaskHelper.serializeString(_tokenizersVar, builder, true);
-        builder.append(Constants.TASK_PARAM_SEP);
-        TaskHelper.serializeString(_nodesVar, builder, true);
-        if (_relationList != null && _relationList.length > 0) {
-            builder.append(Constants.TASK_PARAM_SEP);
-            TaskHelper.serializeStringParams(_relationList, builder);
+        if (_tokenString != null && _tokenString.length > 0) {
+            TaskHelper.serializeStringParams(_tokenString, builder);
         }
         builder.append(Constants.TASK_PARAM_CLOSE);
-
     }
 
     @Override
@@ -66,4 +55,5 @@ public class ActionCreateOrUpdateTokenizeRelationsToNodes implements Action {
         serialize(res);
         return res.toString();
     }
+
 }

@@ -1,4 +1,4 @@
-package lu.jimenez.research.mwdbtoken.actions;
+package lu.jimenez.research.mwdbtoken.core.actions;
 
 public class MwdbTokenActionNames {
 

@@ -1,6 +1,6 @@
-package lu.jimenez.research.mwdbtoken.actions;
+package lu.jimenez.research.mwdbtoken.core.actions;
 
-import lu.jimenez.research.mwdbtoken.task.VocabularyTask;
+import lu.jimenez.research.mwdbtoken.core.task.VocabularyTask;
 import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.internal.task.TaskHelper;

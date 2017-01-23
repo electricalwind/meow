@@ -1,4 +1,4 @@
-package lu.jimenez.research.mwdbtoken.actions;
+package lu.jimenez.research.mwdbtoken.core.actions;
 
 import org.junit.jupiter.api.Test;
 import org.mwg.Node;
@@ -6,10 +6,10 @@ import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-import static lu.jimenez.research.mwdbtoken.Constants.ENTRY_POINT_NODE_NAME;
-import static lu.jimenez.research.mwdbtoken.Constants.VOCABULARY_NODE_NAME;
-import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.initializeVocabulary;
-import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.retrieveVocabularyNode;
+import static lu.jimenez.research.mwdbtoken.core.Constants.ENTRY_POINT_NODE_NAME;
+import static lu.jimenez.research.mwdbtoken.core.Constants.VOCABULARY_NODE_NAME;
+import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.initializeVocabulary;
+import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.retrieveVocabularyNode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 

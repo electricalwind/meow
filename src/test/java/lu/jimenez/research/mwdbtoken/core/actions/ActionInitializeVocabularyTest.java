@@ -1,13 +1,13 @@
-package lu.jimenez.research.mwdbtoken.actions;
+package lu.jimenez.research.mwdbtoken.core.actions;
 
 import org.junit.jupiter.api.Test;
 import org.mwg.Callback;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 
-import static lu.jimenez.research.mwdbtoken.Constants.*;
-import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.initializeVocabulary;
-import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.retrieveVocabularyNode;
+import static lu.jimenez.research.mwdbtoken.core.Constants.*;
+import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.initializeVocabulary;
+import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.retrieveVocabularyNode;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;

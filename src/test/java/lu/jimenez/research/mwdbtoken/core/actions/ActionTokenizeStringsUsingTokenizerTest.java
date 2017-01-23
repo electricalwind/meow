@@ -1,12 +1,12 @@
-package lu.jimenez.research.mwdbtoken.actions;
+package lu.jimenez.research.mwdbtoken.core.actions;
 
-import lu.jimenez.research.mwdbtoken.Constants;
+import lu.jimenez.research.mwdbtoken.core.Constants;
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer;
 import org.junit.jupiter.api.Test;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 
-import static lu.jimenez.research.mwdbtoken.actions.MwdbTokenActions.tokenizeStringsUsingTokenizer;
+import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.tokenizeStringsUsingTokenizer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 

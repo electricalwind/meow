@@ -1,4 +1,4 @@
-package lu.jimenez.research.mwdbtoken;
+package lu.jimenez.research.mwdbtoken.core;
 
 public final class Constants {
 

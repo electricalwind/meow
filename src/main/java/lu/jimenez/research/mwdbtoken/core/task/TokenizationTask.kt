@@ -1,4 +1,4 @@
-package lu.jimenez.research.mwdbtoken.task
+package lu.jimenez.research.mwdbtoken.core.task
 
 import lu.jimenez.research.mwdbtoken.tokenization.*
 import lu.jimenez.research.mwdbtoken.tokenization.preprocessor.TokenPreprocessor
