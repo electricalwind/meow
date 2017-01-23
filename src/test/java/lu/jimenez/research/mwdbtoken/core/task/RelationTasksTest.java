@@ -11,8 +11,8 @@ import org.mwg.task.TaskContext;
 
 import java.util.stream.IntStream;
 
-import static lu.jimenez.research.mwdbtoken.core.Constants.ENTRY_POINT_INDEX;
-import static lu.jimenez.research.mwdbtoken.core.Constants.TOKENIZE_CONTENT_NAME;
+import static lu.jimenez.research.mwdbtoken.core.CoreConstants.ENTRY_POINT_INDEX;
+import static lu.jimenez.research.mwdbtoken.core.CoreConstants.TOKENIZE_CONTENT_NAME;
 import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.initializeVocabulary;
 import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.tokenizeStringsUsingTokenizer;
 import static org.junit.jupiter.api.Assertions.assertEquals;

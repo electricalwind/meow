@@ -1,6 +1,6 @@
 package lu.jimenez.research.mwdbtoken.core;
 
-public final class Constants {
+public final class CoreConstants {
 
 
     public final static String ENTRY_POINT_INDEX = "entryPoint";

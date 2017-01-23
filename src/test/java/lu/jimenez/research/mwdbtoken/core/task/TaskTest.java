@@ -6,7 +6,7 @@ import org.mwg.*;
 import org.mwg.internal.scheduler.NoopScheduler;
 import org.mwg.memory.offheap.OffHeapMemoryPlugin;
 
-import static lu.jimenez.research.mwdbtoken.core.Constants.ENTRY_POINT_INDEX;
+import static lu.jimenez.research.mwdbtoken.core.CoreConstants.ENTRY_POINT_INDEX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.Constants.BEGINNING_OF_TIME;
 

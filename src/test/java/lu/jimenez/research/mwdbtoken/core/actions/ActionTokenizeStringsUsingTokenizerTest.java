@@ -1,6 +1,6 @@
 package lu.jimenez.research.mwdbtoken.core.actions;
 
-import lu.jimenez.research.mwdbtoken.core.Constants;
+import lu.jimenez.research.mwdbtoken.core.CoreConstants;
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer;
 import org.junit.jupiter.api.Test;
 import org.mwg.task.ActionFunction;
@@ -78,7 +78,7 @@ public class ActionTokenizeStringsUsingTokenizerTest extends ActionTest {
                     public void eval(TaskContext ctx) {
                         assertEquals(ctx.result().size(), 1);
                         Tokenizer tokenizer = (Tokenizer) ctx.result().get(0);
-                        assertEquals(tokenizer.getTypeOfToken(), Constants.NO_TYPE_TOKENIZE);
+                        assertEquals(tokenizer.getTypeOfToken(), CoreConstants.NO_TYPE_TOKENIZE);
                         i[0]++;
                         ctx.continueTask();
                     }
@@ -101,7 +101,7 @@ public class ActionTokenizeStringsUsingTokenizerTest extends ActionTest {
                     public void eval(TaskContext ctx) {
                         assertEquals(ctx.result().size(), 3);
                         Tokenizer tokenizer = (Tokenizer) ctx.result().get(2);
-                        assertEquals(tokenizer.getTypeOfToken(), Constants.NO_TYPE_TOKENIZE);
+                        assertEquals(tokenizer.getTypeOfToken(), CoreConstants.NO_TYPE_TOKENIZE);
                         i[0]++;
                         ctx.continueTask();
                     }

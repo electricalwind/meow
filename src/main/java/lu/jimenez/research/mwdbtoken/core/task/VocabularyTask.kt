@@ -1,6 +1,6 @@
 package lu.jimenez.research.mwdbtoken.core.task
 
-import lu.jimenez.research.mwdbtoken.core.Constants.*
+import lu.jimenez.research.mwdbtoken.core.CoreConstants.*
 import lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.retrieveVocabularyNode
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import mu.KLogging
@@ -17,13 +17,17 @@ object VocabularyTask : KLogging() {
     @JvmStatic
     fun initializeVocabulary(): Task {
         return newTask()
-                .then(executeAtWorldAndTime("0", "$BEGINNING_OF_TIME",
-                        newTask()
-                                .createNode()
-                                .setAttribute(ENTRY_POINT_NODE_NAME, Type.STRING, VOCABULARY_NODE_NAME)
-                                .timeSensitivity("-1", "0")
-                                .addToGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME)
+                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, VOCABULARY_NODE_NAME)
+                .then(ifEmptyThen(
+                        newTask().then(executeAtWorldAndTime("0", "$BEGINNING_OF_TIME",
+                                newTask()
+                                        .createNode()
+                                        .setAttribute(ENTRY_POINT_NODE_NAME, Type.STRING, VOCABULARY_NODE_NAME)
+                                        .timeSensitivity("-1", "0")
+                                        .addToGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME)
+                        ))
                 ))
+
 
     }
 
@@ -34,7 +38,7 @@ object VocabularyTask : KLogging() {
     }
 
     @JvmStatic
-    fun rebuildingTokenizeContent(tokenizedContentsVar : String):Task{
+    fun rebuildingTokenizeContent(tokenizedContentsVar: String): Task {
         return newTask()
                 .readVar(tokenizedContentsVar)
                 .map(
@@ -42,13 +46,13 @@ object VocabularyTask : KLogging() {
                                 .defineAsVar("tokenizeContent")
                                 .thenDo { ctx ->
                                     val tokenizedContentNode = ctx.resultAsNodes()[0]
-                                    tokenizedContentNode.relation(TOKENIZE_CONTENT_TOKENS,{nodeArray ->
+                                    tokenizedContentNode.relation(TOKENIZE_CONTENT_TOKENS, { nodeArray ->
                                         val content = nodeArray.map { node -> node.get(TOKEN_NAME) as String }.joinToString(separator = " ")
                                         val type = tokenizedContentNode.get("type")
                                         val name = tokenizedContentNode.get(TOKENIZE_CONTENT_NAME)
-                                        ctx.continueWith(ctx.wrap(arrayOf(name,type,content)))
+                                        ctx.continueWith(ctx.wrap(arrayOf(name, type, content)))
                                     })
-                        }
+                                }
                 )
 
     }

@@ -1,6 +1,6 @@
 package lu.jimenez.research.mwdbtoken.core.task
 
-import lu.jimenez.research.mwdbtoken.core.Constants.*
+import lu.jimenez.research.mwdbtoken.core.CoreConstants.*
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer
 import lu.jimenez.research.mwdbtoken.utils.MinimunEditDistance
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*

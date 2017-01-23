@@ -6,7 +6,7 @@ import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-import static lu.jimenez.research.mwdbtoken.core.Constants.*;
+import static lu.jimenez.research.mwdbtoken.core.CoreConstants.*;
 import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.getOrCreateTokensFromString;
 import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.initializeVocabulary;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -219,7 +219,7 @@ public class ActionGetOrCreateTokensFromStringTest extends ActionTest {
                     @Override
                     public void eval(TaskContext ctx) {
                         System.out.println(ctx.variable("voc").get(0));
-                        ((Node)ctx.variable("voc").get(0)).timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
+                        ((Node)ctx.variable("voc").get(0)).timepoints(CoreConstants.BEGINNING_OF_TIME, CoreConstants.END_OF_TIME, new Callback<long[]>() {
                             @Override
                             public void on(long[] result) {
                                 for(int i=0;i<result.length;i++){

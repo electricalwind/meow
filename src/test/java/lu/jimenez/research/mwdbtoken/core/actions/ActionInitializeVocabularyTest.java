@@ -5,7 +5,7 @@ import org.mwg.Callback;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 
-import static lu.jimenez.research.mwdbtoken.core.Constants.*;
+import static lu.jimenez.research.mwdbtoken.core.CoreConstants.*;
 import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.initializeVocabulary;
 import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.retrieveVocabularyNode;
 
