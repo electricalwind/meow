@@ -5,5 +5,7 @@ public class MwdbNgramActionNames {
     public static String RETRIEVE_NGRAM_MAIN_NODE = "retrieveNgramMainNode";
     public static String GET_OR_CREATE_NGRAM_FROM_STRING = "getOrCreateNgramFromString";
     public static String GET_OR_CREATE_NGRAM_FROM_VAR = "getOrCreateNgramFromVar";
+    public static String INITIALIZE_CORPUS = "initializeCorpus";
+    public static String RETRIEVE_CORPUS_MAIN_NODE = "retrieveCorpusMainNode";
 
 }

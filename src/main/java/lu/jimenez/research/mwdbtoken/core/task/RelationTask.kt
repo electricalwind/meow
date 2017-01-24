@@ -269,6 +269,7 @@ object RelationTask {
                 }
                 .addVarToRelation(TOKENIZE_CONTENT_FATHER, nodeVar)
                 .setAttribute(TOKENIZE_CONTENT_NAME, Type.STRING, "{{$relationVar}}")
+                .setAttribute("typeOfNode", Type.STRING, "tokenizeContent")
 
                 .readVar(nodeVar)
                 .addVarToRelation(TOKENIZE_CONTENT_RELATION, "relationNode", TOKENIZE_CONTENT_NAME)

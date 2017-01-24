@@ -56,6 +56,28 @@ public class MwdbNgramActionPlugin implements Plugin {
                         else return null;
                     }
                 });
+
+        graph.actionRegistry()
+                .declaration(MwdbNgramActionNames.INITIALIZE_CORPUS)
+                .setParams()
+                .setDescription("Create the corpus Main Node")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        return initializeCorpus();
+                    }
+                });
+
+        graph.actionRegistry()
+                .declaration(MwdbNgramActionNames.RETRIEVE_CORPUS_MAIN_NODE)
+                .setParams()
+                .setDescription("Retrieve the Corpus Main Node")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        return retrieveCorpusMainNode();
+                    }
+                });
     }
 
     @Override
