@@ -55,7 +55,7 @@ class ActionGetOrCreateTokenFromVarTest extends ActionTest {
                 })
 
                 .execute(graph, null);
-
+        assertEquals(3, counter[0]);
         removeGraph();
     }
 
@@ -143,6 +143,7 @@ class ActionGetOrCreateTokenFromVarTest extends ActionTest {
                     }
                 })
                 .execute(graph, null);
+        assertEquals(7, counter[0]);
         removeGraph();
     }
 

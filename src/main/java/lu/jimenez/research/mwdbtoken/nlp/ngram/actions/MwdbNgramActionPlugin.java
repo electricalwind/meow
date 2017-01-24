@@ -78,6 +78,17 @@ public class MwdbNgramActionPlugin implements Plugin {
                         return retrieveCorpusMainNode();
                     }
                 });
+
+        graph.actionRegistry()
+                .declaration(MwdbNgramActionNames.GET_OR_CREATE_CORPUS)
+                .setParams(Type.STRING)
+                .setDescription("Get or create a corpus Node")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        return getOrCreateCorpus((String) params[0]);
+                    }
+                });
     }
 
     @Override

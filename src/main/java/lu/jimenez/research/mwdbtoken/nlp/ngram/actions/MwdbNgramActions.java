@@ -1,5 +1,6 @@
 package lu.jimenez.research.mwdbtoken.nlp.ngram.actions;
 
+import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.corpus.ActionGetOrCreateCorpus;
 import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.corpus.ActionInitializeCorpus;
 import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.corpus.ActionRetrieveCorpusMainNode;
 import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ngram.ActionGetOrCreateNgramFromString;
@@ -32,5 +33,9 @@ public class MwdbNgramActions {
 
     public static Action retrieveCorpusMainNode() {
         return new ActionRetrieveCorpusMainNode();
+    }
+
+    public static Action getOrCreateCorpus(String corpusName) {
+        return new ActionGetOrCreateCorpus(corpusName);
     }
 }
