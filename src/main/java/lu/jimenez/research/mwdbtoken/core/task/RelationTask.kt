@@ -1,6 +1,7 @@
 package lu.jimenez.research.mwdbtoken.core.task
 
 import lu.jimenez.research.mwdbtoken.core.CoreConstants.*
+import lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.getOrCreateTokensFromString
 import lu.jimenez.research.mwdbtoken.tokenization.tokenizer.Tokenizer
 import lu.jimenez.research.mwdbtoken.utils.MinimunEditDistance
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
@@ -159,7 +160,7 @@ object RelationTask {
                     else {
                         val newToken = ctx.variable(tokenizerVar)[0] as Tokenizer
                         newTask()
-                                .pipe(VocabularyTask.getOrCreateTokensFromString(newToken.getTokens().toTypedArray()))
+                                .then(getOrCreateTokensFromString(*newToken.getTokens().toTypedArray()))
                                 .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD
                                 ) { res -> ctx.continueWith(res) }
                     }
@@ -277,7 +278,7 @@ object RelationTask {
                     val tokenizer = ctx.result()[0] as Tokenizer
                     ctx.setVariable("type", tokenizer.getTypeOfToken() ?: NO_TYPE_TOKENIZE)
                     newTask()
-                            .pipe(VocabularyTask.getOrCreateTokensFromString(tokenizer.getTokens().toTypedArray()))
+                            .then(getOrCreateTokensFromString(*tokenizer.getTokens().toTypedArray()))
                             .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD
                             ) { res -> ctx.continueWith(res) }
                 }

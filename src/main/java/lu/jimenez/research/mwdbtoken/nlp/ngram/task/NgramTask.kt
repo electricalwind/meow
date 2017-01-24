@@ -4,6 +4,7 @@ import lu.jimenez.research.mwdbtoken.core.CoreConstants.*
 import lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.getOrCreateTokensFromString
 import lu.jimenez.research.mwdbtoken.nlp.ngram.NgramConstants.*
 import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions
+import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.getOrCreateNgramFromVar
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import org.mwg.*
 import org.mwg.Constants.BEGINNING_OF_TIME
@@ -45,18 +46,28 @@ object NgramTask {
         return newTask()
                 .then(getOrCreateTokensFromString(*grams))
                 .defineAsVar("tokenList")
-                .then(ifNotEmptyThen(
-                        getOrCreateNgramFromTokenVar("tokenList")
-                )
+                .then(
+                        ifNotEmptyThen(
+                                getOrCreateNgramFromTokenVar("tokenList")
+                        )
                 )
     }
 
     @JvmStatic
     fun getOrCreateNgramFromTokenVar(tokensVar: String): Task {
         return newTask()
+                .readVar(tokensVar)
+                .thenDo { ctx ->
+                    val listOfId = ctx.resultAsNodes().asArray()
+                            .map { (it as Node).id() }
+                            .joinToString(separator = ",", prefix = "[", postfix = "]")
+
+                    ctx.continueWith(ctx.wrap(listOfId))
+                }
+                .defineAsVar("tokensId")
                 .then(MwdbNgramActions.retrieveNgramMainNode())
                 .defineAsVar("ngramMain")
-                .traverse(NGRAM_INDEX, GRAMS_TOKENS, "{{$tokensVar}}")
+                .traverse(NGRAM_INDEX, GRAMS_TOKENS, "{{tokensId}}")
                 .then(
                         ifEmptyThen(
                                 createNgramFromToken(tokensVar)
@@ -76,20 +87,22 @@ object NgramTask {
                             val order = ctx.variable(tokensVar).size()
                             val node = ctx.resultAsNodes()[0]
                             node.set("order", Type.INT, order)
+                            val tokens = ctx.variable(tokensVar).asArray()
+
                             if (order != 1) {
                                 newTask()
-                                        .inject(ctx.result().asArray().take(ctx.result().size() - 1))
+                                        .inject(tokens.take(tokens.size - 1).toTypedArray())
                                         .defineAsVar("history")
-                                        .pipe(getOrCreateNgramFromTokenVar("history"))
+                                        .then(getOrCreateNgramFromVar("history"))
                                         .defineAsVar("historyNgram")
                                         .addVarToRelation("historyTo", "newNgram")
                                         .readVar("newNgram")
                                         .addVarToRelation("history", "historyNgram")
 
 
-                                        .inject(ctx.result().asArray().takeLast(ctx.result().size() - 1))
+                                        .inject(tokens.takeLast(tokens.size - 1).toTypedArray())
                                         .defineAsVar("backoff")
-                                        .pipe(getOrCreateNgramFromTokenVar("backoff"))
+                                        .then(getOrCreateNgramFromVar("backoff"))
                                         .defineAsVar("backOffNgram")
                                         .addVarToRelation("backoffTo", "newNgram")
                                         .readVar("newNgram")
@@ -100,6 +113,7 @@ object NgramTask {
                         }
                         .readVar("ngramMain")
                         .addVarToRelation(NGRAM_INDEX, "newNgram", GRAMS_TOKENS)
+                        .readVar("newNgram")
         ))
     }
 }
