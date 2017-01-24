@@ -1,30 +1,29 @@
-package lu.jimenez.research.mwdbtoken.nlp.ngram.actions;
+package lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ngram;
 
+import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ActionTest;
 import org.junit.jupiter.api.Test;
 import org.mwg.Node;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 
 import static lu.jimenez.research.mwdbtoken.core.CoreConstants.TOKEN_NAME;
-import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.getOrCreateTokensFromString;
 import static lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActions.initializeVocabulary;
-import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.*;
+import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.getOrCreateNgramFromString;
+import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.initializeNgram;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 
-class ActionGetOrCreateTokenFromVarTest extends ActionTest {
+class ActionGetOrCreateNgramFromStringTest extends ActionTest {
+
 
     @Test
     public void test() {
+
         initGraph();
         final int[] counter = {0};
-
-        newTask()
-                .then(initializeVocabulary())
+        newTask().then(initializeVocabulary())
                 .then(initializeNgram())
-                .then(getOrCreateTokensFromString("This"))
-                .defineAsVar("token")
-                .then(getOrCreateNgramFromVar("token"))
+                .then(getOrCreateNgramFromString("This"))
                 .thenDo(new ActionFunction() {
                     @Override
                     public void eval(TaskContext ctx) {
@@ -52,22 +51,20 @@ class ActionGetOrCreateTokenFromVarTest extends ActionTest {
                         ctx.continueTask();
                     }
                 })
-
                 .execute(graph, null);
-
+        assertEquals(3, counter[0]);
         removeGraph();
     }
 
+
     @Test
     public void test2() {
+
         initGraph();
         final int[] counter = {0};
-        newTask()
-                .then(initializeVocabulary())
+        newTask().then(initializeVocabulary())
                 .then(initializeNgram())
-                .then(getOrCreateTokensFromString("This", "is", "me"))
-                .defineAsVar("token")
-                .then(getOrCreateNgramFromVar("token"))
+                .then(getOrCreateNgramFromString("This", "is", "me"))
                 .defineAsVar("myNgram")
                 .thenDo(new ActionFunction() {
                     @Override
@@ -142,7 +139,7 @@ class ActionGetOrCreateTokenFromVarTest extends ActionTest {
                     }
                 })
                 .execute(graph, null);
+        assertEquals(7, counter[0]);
         removeGraph();
     }
-
 }

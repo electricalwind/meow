@@ -1,5 +1,6 @@
-package lu.jimenez.research.mwdbtoken.nlp.ngram.actions;
+package lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ngram;
 
+import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ActionTest;
 import org.junit.jupiter.api.Test;
 import org.mwg.Node;
 import org.mwg.task.ActionFunction;
@@ -13,7 +14,7 @@ import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.r
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 
-class ActionRetrieveNgramMainNodeTest extends ActionTest{
+class ActionRetrieveNgramMainNodeTest extends ActionTest {
 
     @Test
     public void testinit() {
