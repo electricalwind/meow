@@ -1,8 +1,8 @@
-package lu.jimenez.research.mwdbtoken.nlp.ngram.task
+package lu.jimenez.research.mwdbtoken.nlp.corpus.task
 
 import lu.jimenez.research.mwdbtoken.core.CoreConstants.*
-import lu.jimenez.research.mwdbtoken.nlp.ngram.NgramConstants.*
-import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions
+import lu.jimenez.research.mwdbtoken.nlp.corpus.CorpusConstants.*
+import lu.jimenez.research.mwdbtoken.nlp.corpus.actions.MwdbCorpusActions
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import org.mwg.Constants.BEGINNING_OF_TIME
 import org.mwg.Type
@@ -40,7 +40,7 @@ object CorpusTask {
     @JvmStatic
     fun getOrCreateCorpus(corpusName: String): Task {
         return newTask()
-                .then(MwdbNgramActions.retrieveCorpusMainNode())
+                .then(MwdbCorpusActions.retrieveCorpusMainNode())
                 .traverse(CORPUS_RELATION, CORPUS_NAME, corpusName)
                 .then(ifEmptyThen(
                         createCorpus(corpusName)
@@ -56,7 +56,7 @@ object CorpusTask {
                                 .setAttribute(CORPUS_NAME, Type.STRING, corpusName)
                                 .timeSensitivity("-1", "0")
                                 .defineAsVar("corpusNode")
-                                .then(MwdbNgramActions.retrieveCorpusMainNode())
+                                .then(MwdbCorpusActions.retrieveCorpusMainNode())
                                 .defineAsVar("corpusMain")
                                 .addVarToRelation(CORPUS_RELATION, "corpusNode", CORPUS_NAME)
                                 .readVar("corpusNode")
@@ -65,8 +65,47 @@ object CorpusTask {
     }
 
 
-    fun addTokenizeContentToCorpus(): Task {
+    fun addTokenizeContentToCorpus(tokenizeContentVar: String, corpusName: String): Task {
         return newTask()
+                .then(MwdbCorpusActions.getOrCreateCorpus(corpusName))
+                .defineAsVar("corpus")
+                .pipe(addTokenizeContentToCorpusVar(tokenizeContentVar, "corpus"))
     }
+
+    fun addTokenizeContentToCorpusVar(tokenizeContentVar: String, corpusVar: String): Task {
+        return newTask()
+                .readVar(corpusVar)
+
+
+    }
+
+    /**private fun updateNgramForTokenizeContent(tokenizeContentVar: String): Task {
+
+        return newTask()
+                .readVar(tokenizeContentVar)
+                .forEach(
+                        newTask()
+                                .defineAsVar("tokenizedContent")
+                                .declareVar("timepointsTC")
+                                .thenDo { ctx ->
+                                    ctx.resultAsNodes()[0].timepoints(BEGINNING_OF_TIME, END_OF_TIME, { timepoints ->
+                                        ctx.addToVariable("timepointsTC", timepoints)
+                                        ctx.continueTask()
+                                    })
+                                }
+                                .thenDo { ctx ->
+                                    ctx.setVariable("firstTime"
+                                            , ctx.variable("timepointsTC")[0])
+                                }
+                                .travelInTime("firstTime")
+                                .traverse(TOKENIZED_CONTENT_PLUGIN, TOKENIZED_CONTENT_PLUGIN_NGRAM)
+                                .then(ifEmptyThenElse(
+                                        newTask(),
+                                        newTask()
+                                )
+                                )
+                )
+
+    }*/
 
 }

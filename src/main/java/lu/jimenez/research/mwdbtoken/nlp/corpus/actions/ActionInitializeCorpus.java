@@ -1,13 +1,14 @@
-package lu.jimenez.research.mwdbtoken.nlp.ngram.actions.corpus;
+package lu.jimenez.research.mwdbtoken.nlp.corpus.actions;
 
-import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActionNames;
-import lu.jimenez.research.mwdbtoken.nlp.ngram.task.CorpusTask;
+import lu.jimenez.research.mwdbtoken.nlp.corpus.task.CorpusTask;
 import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
+
+import static lu.jimenez.research.mwdbtoken.nlp.corpus.actions.MwdbCorpusActionNames.INITIALIZE_CORPUS;
 
 public class ActionInitializeCorpus implements Action {
     @Override
@@ -35,7 +36,7 @@ public class ActionInitializeCorpus implements Action {
     }
 
     public void serialize(StringBuilder builder) {
-        builder.append(MwdbNgramActionNames.INITIALIZE_CORPUS);
+        builder.append(INITIALIZE_CORPUS);
         builder.append(Constants.TASK_PARAM_OPEN);
         builder.append(Constants.TASK_PARAM_CLOSE);
     }

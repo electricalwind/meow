@@ -1,19 +1,17 @@
-package lu.jimenez.research.mwdbtoken.nlp.ngram.actions.corpus;
+package lu.jimenez.research.mwdbtoken.nlp.ngram.actions;
 
-import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ActionTest;
 import org.junit.jupiter.api.Test;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 
 import static lu.jimenez.research.mwdbtoken.core.CoreConstants.ENTRY_POINT_INDEX;
 import static lu.jimenez.research.mwdbtoken.core.CoreConstants.ENTRY_POINT_NODE_NAME;
-import static lu.jimenez.research.mwdbtoken.nlp.ngram.NgramConstants.CORPUS_MAIN_NODE;
-import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.initializeCorpus;
+import static lu.jimenez.research.mwdbtoken.nlp.ngram.NgramConstants.NGRAM_NODE_NAME;
+import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.initializeNgram;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 
-class ActionInitializeCorpusTest extends ActionTest{
-
+class ActionInitializeNgramTest extends ActionTest {
     @Test
     public void test() {
         int counter = 1;
@@ -21,8 +19,8 @@ class ActionInitializeCorpusTest extends ActionTest{
         initGraph();
         newTask()
                 .travelInTime("0")
-                .then(initializeCorpus())
-                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, CORPUS_MAIN_NODE)
+                .then(initializeNgram())
+                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, NGRAM_NODE_NAME)
                 .thenDo(new ActionFunction() {
                             public void eval(TaskContext context) {
                                 assertEquals(context.resultAsNodes().size(), 1);
@@ -43,9 +41,9 @@ class ActionInitializeCorpusTest extends ActionTest{
         initGraph();
         newTask()
                 .travelInTime("0")
-                .then(initializeCorpus())
+                .then(initializeNgram())
                 .travelInTime("1")
-                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, CORPUS_MAIN_NODE)
+                .readGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME, NGRAM_NODE_NAME)
                 .thenDo(new ActionFunction() {
                             public void eval(TaskContext context) {
                                 assertEquals(context.resultAsNodes().size(), 1);
@@ -58,4 +56,5 @@ class ActionInitializeCorpusTest extends ActionTest{
         assertEquals(counter, i[0]);
         removeGraph();
     }
+
 }

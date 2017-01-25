@@ -1,4 +1,4 @@
-package lu.jimenez.research.mwdbtoken.nlp.ngram.actions.corpus;
+package lu.jimenez.research.mwdbtoken.nlp.corpus.actions;
 
 import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ActionTest;
 import org.junit.jupiter.api.Test;
@@ -8,9 +8,9 @@ import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
 import static lu.jimenez.research.mwdbtoken.core.CoreConstants.ENTRY_POINT_NODE_NAME;
-import static lu.jimenez.research.mwdbtoken.nlp.ngram.NgramConstants.CORPUS_MAIN_NODE;
-import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.initializeCorpus;
-import static lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActions.retrieveCorpusMainNode;
+import static lu.jimenez.research.mwdbtoken.nlp.corpus.CorpusConstants.CORPUS_MAIN_NODE;
+import static lu.jimenez.research.mwdbtoken.nlp.corpus.actions.MwdbCorpusActions.initializeCorpus;
+import static lu.jimenez.research.mwdbtoken.nlp.corpus.actions.MwdbCorpusActions.retrieveCorpusMainNode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.task.Tasks.newTask;
 

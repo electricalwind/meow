@@ -1,18 +1,27 @@
-package lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ngram;
+package lu.jimenez.research.mwdbtoken.nlp.corpus.actions;
 
-import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActionNames;
-import lu.jimenez.research.mwdbtoken.nlp.ngram.task.NgramTask;
+import lu.jimenez.research.mwdbtoken.nlp.corpus.task.CorpusTask;
 import org.mwg.Callback;
 import org.mwg.Constants;
+import org.mwg.internal.task.TaskHelper;
 import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-public class ActionInitializeNgram implements Action {
+import static lu.jimenez.research.mwdbtoken.nlp.corpus.actions.MwdbCorpusActionNames.GET_OR_CREATE_CORPUS;
 
-    public void eval(final TaskContext ctx) {
-        NgramTask.initializeNgram()
+public class ActionGetOrCreateCorpus implements Action {
+
+    private final String _corpusName;
+
+    public ActionGetOrCreateCorpus(String p_corpusName) {
+        this._corpusName = p_corpusName;
+    }
+
+    @Override
+    public void eval(TaskContext ctx) {
+        CorpusTask.getOrCreateCorpus(_corpusName)
                 .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD,
                         new Callback<TaskResult>() {
                             public void on(TaskResult res) {
@@ -35,8 +44,9 @@ public class ActionInitializeNgram implements Action {
     }
 
     public void serialize(StringBuilder builder) {
-        builder.append(MwdbNgramActionNames.INITIALIZE_NGRAM);
+        builder.append(GET_OR_CREATE_CORPUS);
         builder.append(Constants.TASK_PARAM_OPEN);
+        TaskHelper.serializeString(_corpusName, builder, true);
         builder.append(Constants.TASK_PARAM_CLOSE);
     }
 

@@ -1,14 +1,15 @@
-package lu.jimenez.research.mwdbtoken.nlp.ngram.actions.corpus;
+package lu.jimenez.research.mwdbtoken.nlp.corpus.actions;
 
-import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActionNames;
-import lu.jimenez.research.mwdbtoken.nlp.ngram.exception.UninitializeCorpusMainNodeException;
-import lu.jimenez.research.mwdbtoken.nlp.ngram.task.CorpusTask;
+import lu.jimenez.research.mwdbtoken.nlp.corpus.exception.UninitializeCorpusMainNodeException;
+import lu.jimenez.research.mwdbtoken.nlp.corpus.task.CorpusTask;
 import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
+
+import static lu.jimenez.research.mwdbtoken.nlp.corpus.actions.MwdbCorpusActionNames.RETRIEVE_CORPUS_MAIN_NODE;
 
 public class ActionRetrieveCorpusMainNode implements Action {
     public void eval(final TaskContext ctx) {
@@ -33,7 +34,7 @@ public class ActionRetrieveCorpusMainNode implements Action {
     }
 
     public void serialize(StringBuilder builder) {
-        builder.append(MwdbNgramActionNames.RETRIEVE_CORPUS_MAIN_NODE);
+        builder.append(RETRIEVE_CORPUS_MAIN_NODE);
         builder.append(Constants.TASK_PARAM_OPEN);
         builder.append(Constants.TASK_PARAM_CLOSE);
 

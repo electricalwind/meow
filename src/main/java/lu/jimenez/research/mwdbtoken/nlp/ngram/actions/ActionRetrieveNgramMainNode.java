@@ -1,4 +1,4 @@
-package lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ngram;
+package lu.jimenez.research.mwdbtoken.nlp.ngram.actions;
 
 import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.MwdbNgramActionNames;
 import lu.jimenez.research.mwdbtoken.nlp.ngram.exception.UninitializeNgramMainNodeException;
