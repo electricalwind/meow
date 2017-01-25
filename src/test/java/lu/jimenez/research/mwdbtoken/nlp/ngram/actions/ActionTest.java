@@ -4,6 +4,7 @@ import lu.jimenez.research.mwdbtoken.core.actions.MwdbTokenActionPlugin;
 import lu.jimenez.research.mylittleplugin.MyLittleActionPlugin;
 import org.mwg.*;
 import org.mwg.internal.scheduler.NoopScheduler;
+import org.mwg.internal.scheduler.TrampolineScheduler;
 import org.mwg.memory.offheap.OffHeapMemoryPlugin;
 
 import static lu.jimenez.research.mwdbtoken.core.CoreConstants.ENTRY_POINT_INDEX;
@@ -20,7 +21,7 @@ public class ActionTest {
                 .withPlugin(new MwdbTokenActionPlugin())
                 .withPlugin(new MyLittleActionPlugin())
                 .withPlugin(new MwdbNgramActionPlugin())
-                .withScheduler(new NoopScheduler()).build();
+                .withScheduler(new TrampolineScheduler()).build();
         final ActionTest selfPointer = this;
         graph.connect(new Callback<Boolean>() {
 

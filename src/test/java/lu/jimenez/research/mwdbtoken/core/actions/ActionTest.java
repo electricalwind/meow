@@ -2,7 +2,7 @@ package lu.jimenez.research.mwdbtoken.core.actions;
 
 import lu.jimenez.research.mylittleplugin.MyLittleActionPlugin;
 import org.mwg.*;
-import org.mwg.internal.scheduler.NoopScheduler;
+import org.mwg.internal.scheduler.TrampolineScheduler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.Constants.BEGINNING_OF_TIME;
@@ -16,7 +16,7 @@ public abstract class ActionTest {
         graph = new GraphBuilder()
                 .withPlugin(new MwdbTokenActionPlugin())
                 .withPlugin(new MyLittleActionPlugin())
-                .withScheduler(new NoopScheduler()).build();
+                .withScheduler(new TrampolineScheduler()).build();
         final ActionTest selfPointer = this;
         graph.connect(new Callback<Boolean>() {
 

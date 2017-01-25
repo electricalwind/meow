@@ -107,9 +107,13 @@ object NgramTask {
                                         .addVarToRelation("backoffTo", "newNgram")
                                         .readVar("newNgram")
                                         .addVarToRelation("backOff", "backOffNgram")
-                                        .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD, {})
+                                        .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD, {
+                                            ctx.continueTask()
+                                        })
+                            } else {
+                                ctx.continueTask()
                             }
-                            ctx.continueTask()
+
                         }
                         .readVar("ngramMain")
                         .addVarToRelation(NGRAM_INDEX, "newNgram", GRAMS_TOKENS)
