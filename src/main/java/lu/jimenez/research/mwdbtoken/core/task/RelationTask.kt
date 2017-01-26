@@ -279,7 +279,7 @@ object RelationTask {
                 }
                 .addVarToRelation(TOKENIZE_CONTENT_FATHER, nodeVar)
                 .setAttribute(TOKENIZE_CONTENT_NAME, Type.STRING, "{{$relationVar}}")
-                .setAttribute("typeOfNode", Type.STRING, "tokenizeContent")
+                .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_TOKENIZE_CONTENT)
 
                 .readVar(nodeVar)
                 .addVarToRelation(TOKENIZE_CONTENT_RELATION, "relationNode", TOKENIZE_CONTENT_NAME)
@@ -305,7 +305,7 @@ object RelationTask {
                                                                 newTask()
                                                                         .createNode()
                                                                         .setAttribute("id", Type.LONG, "{{relationNodeId}}")
-
+                                                                        .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_INVERTED_INDEX)
                                                                         .setAttribute("type", Type.STRING, "{{type}}")
                                                                         .defineAsVar("invertedIndex")
                                                                         .addVarToRelation(INVERTED_WORD_INDEX_RELATION, "token")

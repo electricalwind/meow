@@ -1,11 +1,13 @@
 package lu.jimenez.research.mwdbtoken.nlp.corpus.task
 
 import lu.jimenez.research.mwdbtoken.core.CoreConstants.*
+import lu.jimenez.research.mwdbtoken.core.task.UtilTask.checkNodesType
 import lu.jimenez.research.mwdbtoken.nlp.corpus.CorpusConstants.*
 import lu.jimenez.research.mwdbtoken.nlp.corpus.actions.MwdbCorpusActions
 import lu.jimenez.research.mylittleplugin.MyLittleActions.*
 import org.mwg.Constants.BEGINNING_OF_TIME
 import org.mwg.Type
+import org.mwg.struct.Relation
 import org.mwg.task.Task
 import org.mwg.task.Tasks.*
 
@@ -25,7 +27,6 @@ object CorpusTask {
                                                         .timeSensitivity("-1", "0")
                                                         .addToGlobalIndex(ENTRY_POINT_INDEX, ENTRY_POINT_NODE_NAME)
                                         )
-
                                 )
                         )
                 )
@@ -54,6 +55,7 @@ object CorpusTask {
                         newTask()
                                 .createNode()
                                 .setAttribute(CORPUS_NAME, Type.STRING, corpusName)
+                                .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_CORPUS)
                                 .timeSensitivity("-1", "0")
                                 .defineAsVar("corpusNode")
                                 .then(MwdbCorpusActions.retrieveCorpusMainNode())
@@ -64,48 +66,61 @@ object CorpusTask {
         )
     }
 
-
+    @JvmStatic
     fun addTokenizeContentToCorpus(tokenizeContentVar: String, corpusName: String): Task {
         return newTask()
                 .then(MwdbCorpusActions.getOrCreateCorpus(corpusName))
                 .defineAsVar("corpus")
-                .pipe(addTokenizeContentToCorpusVar(tokenizeContentVar, "corpus"))
-    }
-
-    fun addTokenizeContentToCorpusVar(tokenizeContentVar: String, corpusVar: String): Task {
-        return newTask()
-                .readVar(corpusVar)
-
-
-    }
-
-    /**private fun updateNgramForTokenizeContent(tokenizeContentVar: String): Task {
-
-        return newTask()
+                .pipe(checkNodesType(tokenizeContentVar, NODE_TYPE_TOKENIZE_CONTENT))
                 .readVar(tokenizeContentVar)
                 .forEach(
                         newTask()
-                                .defineAsVar("tokenizedContent")
-                                .declareVar("timepointsTC")
-                                .thenDo { ctx ->
-                                    ctx.resultAsNodes()[0].timepoints(BEGINNING_OF_TIME, END_OF_TIME, { timepoints ->
-                                        ctx.addToVariable("timepointsTC", timepoints)
-                                        ctx.continueTask()
-                                    })
+                                .defineAsVar("tokenizeContent")
+                                .thenDo {
+                                    ctx ->
+                                    ctx.setVariable("id", ctx.resultAsNodes()[0].id())
+                                    ctx.continueTask()
                                 }
+                                .readVar("corpus")
                                 .thenDo { ctx ->
-                                    ctx.setVariable("firstTime"
-                                            , ctx.variable("timepointsTC")[0])
-                                }
-                                .travelInTime("firstTime")
-                                .traverse(TOKENIZED_CONTENT_PLUGIN, TOKENIZED_CONTENT_PLUGIN_NGRAM)
-                                .then(ifEmptyThenElse(
-                                        newTask(),
-                                        newTask()
-                                )
-                                )
-                )
+                                    val relation = ctx.resultAsNodes()[0].getOrCreate(CORPUS_TO_TOKENIZEDCONTENTS_RELATION, Type.RELATION) as Relation
+                                    val id = ctx.variable("id")[0] as Long
+                                    if (relation.size() == 0 || !relation.all().contains(id))
+                                        relation.add(id)
 
-    }*/
+                                    ctx.continueTask()
+
+                                }
+                )
+    }
+
+    @JvmStatic
+    fun removeTokenizeContentFromCorpus(tokenizeContentVar: String, corpusName: String): Task {
+
+        return newTask()
+                .then(MwdbCorpusActions.getOrCreateCorpus(corpusName))
+                .defineAsVar("corpus")
+                .pipe(checkNodesType(tokenizeContentVar, NODE_TYPE_TOKENIZE_CONTENT))
+                .readVar(tokenizeContentVar)
+                .forEach(
+                        newTask()
+                                .defineAsVar("tokenizeContent")
+                                .thenDo {
+                                    ctx ->
+                                    ctx.setVariable("id", ctx.resultAsNodes()[0].id())
+                                    ctx.continueTask()
+                                }
+                                .readVar("corpus")
+                                .thenDo { ctx ->
+                                    val relation = ctx.resultAsNodes()[0].getOrCreate(CORPUS_TO_TOKENIZEDCONTENTS_RELATION,Type.RELATION) as Relation
+                                    val id = ctx.variable("id")[0] as Long
+                                    if (relation.size() != 0 && relation.all().contains(id))
+                                        relation.remove(id)
+
+                                    ctx.continueTask()
+                                }
+                )
+    }
+
 
 }

@@ -5,5 +5,5 @@ public class MwdbCorpusActionNames {
     public static String INITIALIZE_CORPUS = "initializeCorpus";
     public static String RETRIEVE_CORPUS_MAIN_NODE = "retrieveCorpusMainNode";
     public static String GET_OR_CREATE_CORPUS = "getOrCreateCorpus";
-
+    public static String ADD_REMOVE_TOKENIZE_CONTENTS_OF_CORPUS = "addRemoveTokenizeContentOfCorpus";
 }

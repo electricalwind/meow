@@ -90,6 +90,7 @@ object VocabularyTask : KLogging() {
                                 .createNode()
                                 .timeSensitivity("-1", "0")
                                 .setAttribute(TOKEN_NAME, Type.STRING, "{{token}}")
+                                .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_TOKEN)
                                 .defineAsVar("newToken")
                                 .readVar("Vocabulary")
                                 .addVarToRelation(VOCABULARY_TOKEN_INDEX, "newToken", TOKEN_NAME)

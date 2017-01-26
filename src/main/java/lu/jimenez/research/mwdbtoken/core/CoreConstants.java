@@ -25,4 +25,10 @@ public final class CoreConstants {
 
     public final static String NO_TYPE_TOKENIZE = "noType";
 
+    public final static String NODE_TYPE = "typeOfNode";
+
+    public final static String NODE_TYPE_TOKENIZE_CONTENT = "tokenizedContent";
+    public final static String NODE_TYPE_TOKEN = "token";
+    public final static String NODE_TYPE_INVERTED_INDEX = "token";
+
 }

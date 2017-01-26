@@ -1,6 +1,6 @@
 package lu.jimenez.research.mwdbtoken.nlp.corpus.actions;
 
-import lu.jimenez.research.mwdbtoken.nlp.ngram.actions.ActionTest;
+import lu.jimenez.research.mwdbtoken.nlp.ActionTest;
 import org.junit.jupiter.api.Test;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
