@@ -57,6 +57,17 @@ public class MwdbNgramActionPlugin implements Plugin {
                     }
                 });
 
+        graph.actionRegistry()
+                .declaration(MwdbNgramActionNames.UPDATE_NGRAM_TC_FROM_VAR)
+                .setParams(Type.STRING)
+                .setDescription("create or update for all time the ngram version of tokenized content present in var")
+                .setFactory(new ActionFactory() {
+                    @Override
+                    public Action create(Object[] params) {
+                        return updateNgramTokenizedContentFromVar((String) params[0]);
+                    }
+                });
+
 
     }
 

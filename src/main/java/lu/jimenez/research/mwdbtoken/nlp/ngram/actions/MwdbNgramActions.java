@@ -20,5 +20,9 @@ public class MwdbNgramActions {
         return new ActionGetOrCreateTokenFromVar(var);
     }
 
+    public static Action updateNgramTokenizedContentFromVar(String var) {
+        return new ActionUpdateNgramTokenizeContentFromVar(var);
+    }
+
 
 }

@@ -24,6 +24,7 @@ object RelationTask {
     val ngramtokenizedContent: String = "ngramtc"
     val timepoints: String = "timepoints"
 
+    @JvmStatic
     fun updateNgramTokenizeContentVar(tokenizeContentVar: String): Task {
         return newTask()
                 .pipe(checkNodesType(tokenizeContentVar, NODE_TYPE_TOKENIZE_CONTENT))
