@@ -1,4 +1,4 @@
-# MWDB Token
+# MWG Token
 
 
 ![MWDB-version](https://img.shields.io/badge/MWDB--version-11--SNAPSHOT-green.svg)
