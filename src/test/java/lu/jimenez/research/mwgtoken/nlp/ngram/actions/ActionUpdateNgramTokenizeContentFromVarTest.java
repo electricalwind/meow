@@ -18,6 +18,9 @@ package lu.jimenez.research.mwgtoken.nlp.ngram.actions;
 import lu.jimenez.research.mwgtoken.core.task.RelationTask;
 import lu.jimenez.research.mwgtoken.nlp.ActionTest;
 import org.junit.jupiter.api.Test;
+import org.mwg.Callback;
+import org.mwg.task.ActionFunction;
+import org.mwg.task.TaskContext;
 
 import static lu.jimenez.research.mwgtoken.core.CoreConstants.ENTRY_POINT_INDEX;
 import static lu.jimenez.research.mwgtoken.core.CoreConstants.TOKENIZE_CONTENT_RELATION;
@@ -25,6 +28,8 @@ import static lu.jimenez.research.mwgtoken.core.actions.MwdbTokenActions.initial
 import static lu.jimenez.research.mwgtoken.core.actions.MwdbTokenActions.tokenizeStringsUsingTokenizer;
 import static lu.jimenez.research.mwgtoken.nlp.ngram.actions.MwdbNgramActions.initializeNgram;
 import static lu.jimenez.research.mwgtoken.nlp.ngram.actions.MwdbNgramActions.updateNgramTokenizedContentFromVar;
+import static org.mwg.Constants.BEGINNING_OF_TIME;
+import static org.mwg.Constants.END_OF_TIME;
 import static org.mwg.task.Tasks.newTask;
 
 class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
@@ -56,9 +61,32 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
                 .setAsVar("tc")
                 .then(initializeNgram())
                 .then(updateNgramTokenizedContentFromVar("tc"))
+                .thenDo(new ActionFunction() {
+                    @Override
+                    public void eval(TaskContext ctx) {
+                        int i = 0;
+ctx.continueTask();
+
+                    }
+                })
                 .traverse("plugin")
+                .thenDo(new ActionFunction() {
+                    @Override
+                    public void eval(TaskContext ctx) {
+                        int i = 0;
+                        ctx.resultAsNodes().get(0).timepoints(BEGINNING_OF_TIME, END_OF_TIME, new Callback<long[]>() {
+                            @Override
+                            public void on(long[] result) {
+                                result.toString();
+                                ctx.continueTask();
+                            }
+                        });
+
+
+                    }
+                })
                 .println("{{result}}")
-                /**.travelInTime("0")
+                .travelInTime("0")
                 .println("{{result}}")
                 /**.travelInTime("10")
                 .println("{{result}}")*/

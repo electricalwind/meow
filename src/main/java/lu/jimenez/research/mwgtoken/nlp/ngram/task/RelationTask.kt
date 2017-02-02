@@ -91,7 +91,7 @@ object RelationTask {
                                     ctx.continueTask()
                                 }
                                 .pipe(updateNgramsRelation())
-                )
+                ).readVar(tokenizedContent)
 
 
     }
@@ -126,7 +126,7 @@ object RelationTask {
 
     private fun createNgramsRelation(): Task {
         return newTask()
-                .readVar(tokenizedContent)
+                .then(readUpdatedTimeVar(tokenizedContent))
                 .traverse(TOKENIZE_CONTENT_TOKENS)
                 .thenDo { ctx->
                     println("ee")
@@ -209,7 +209,7 @@ object RelationTask {
 
     private fun updateNgramsRelation(): Task {
         return newTask()
-                .readVar(tokenizedContent)
+                .then(readUpdatedTimeVar(tokenizedContent))
                 .traverse(TOKENIZE_CONTENT_TOKENS)
                 .setAsVar("tokens")
                 .thenDo { ctx ->
@@ -223,12 +223,12 @@ object RelationTask {
                                     ctx.continueTask()
                                 }
                                 .setAsVar("newNgram")
-                                .readVar(ngramtokenizedContent)
+                                .then(readUpdatedTimeVar(ngramtokenizedContent))
                                 .thenDo { ctx ->
                                     val n = ctx.variable("i").get(0) as Int
                                     val node = ctx.resultAsNodes()[0]
                                     node.rephase()
-                                    val relation = node.get("$n") as Relation
+                                    val relation = node.getOrCreate("$n",Type.RELATION) as Relation
                                     val relationsId = relation.all().take(relation.size())
                                     val newContent = ctx.variable("newNgram").asArray()
                                     val newContentId = mutableListOf<Long>()

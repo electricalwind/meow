@@ -20,6 +20,7 @@ import lu.jimenez.research.mwgtoken.nlp.ngram.actions.MwdbNgramActionPlugin;
 import lu.jimenez.research.mylittleplugin.MyLittleActionPlugin;
 import org.mwg.*;
 import org.mwg.internal.scheduler.NoopScheduler;
+import org.mwg.internal.scheduler.TrampolineScheduler;
 import org.mwg.memory.offheap.OffHeapMemoryPlugin;
 
 import static lu.jimenez.research.mwgtoken.core.CoreConstants.ENTRY_POINT_INDEX;
@@ -36,7 +37,7 @@ public class ActionTest {
                 .withPlugin(new MwdbTokenActionPlugin())
                 .withPlugin(new MyLittleActionPlugin())
                 .withPlugin(new MwdbNgramActionPlugin())
-                .withScheduler(new NoopScheduler()).build();
+                .withScheduler(new TrampolineScheduler()).build();
         final ActionTest selfPointer = this;
         graph.connect(new Callback<Boolean>() {
 
