@@ -85,11 +85,6 @@ object RelationTask {
                         newTask()
                                 .setAsVar("timepoint")
                                 .travelInTime("{{timepoint}}")
-                                .thenDo{
-                                    ctx ->
-                                    println("dd")
-                                    ctx.continueTask()
-                                }
                                 .pipe(updateNgramsRelation())
                 ).readVar(tokenizedContent)
 
@@ -116,8 +111,16 @@ object RelationTask {
                         newTask()
                                 .setAsVar("time")
                                 .travelInTime("{{time}}")
-                                .readVar(tokenizedContent)
+                                .then(readUpdatedTimeVar(tokenizedContent))
+                                .thenDo { ctx ->
+                                    val i =0
+                                    ctx.continueTask()
+                                }
                                 .addVarToRelation(TOKENIZE_CONTENT_PLUGIN, ngramtokenizedContent, NODE_TYPE)
+                                .thenDo { ctx ->
+                                    val i =0
+                                    ctx.continueTask()
+                                }
                 )
                 .readVar(ngramtokenizedContent)
 
@@ -128,10 +131,6 @@ object RelationTask {
         return newTask()
                 .then(readUpdatedTimeVar(tokenizedContent))
                 .traverse(TOKENIZE_CONTENT_TOKENS)
-                .thenDo { ctx->
-                    println("ee")
-                    ctx.continueTask()
-                }
                 .setAsVar("tokens")
                 .loop("1", "$MAXIMUM_ORDER_OF_N",
 
@@ -212,23 +211,15 @@ object RelationTask {
                 .then(readUpdatedTimeVar(tokenizedContent))
                 .traverse(TOKENIZE_CONTENT_TOKENS)
                 .setAsVar("tokens")
-                .thenDo { ctx ->
-                    println("coucou")
-                    ctx.continueTask()
-                }
                 .loop("1", "$MAXIMUM_ORDER_OF_N",
                         retrieveNgram()
-                                .thenDo { ctx ->
-                                    println("coucou")
-                                    ctx.continueTask()
-                                }
                                 .setAsVar("newNgram")
                                 .then(readUpdatedTimeVar(ngramtokenizedContent))
                                 .thenDo { ctx ->
                                     val n = ctx.variable("i").get(0) as Int
                                     val node = ctx.resultAsNodes()[0]
                                     node.rephase()
-                                    val relation = node.getOrCreate("$n",Type.RELATION) as Relation
+                                    val relation = node.getOrCreate("$n", Type.RELATION) as Relation
                                     val relationsId = relation.all().take(relation.size())
                                     val newContent = ctx.variable("newNgram").asArray()
                                     val newContentId = mutableListOf<Long>()

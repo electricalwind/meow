@@ -90,6 +90,7 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
                                 assertEquals(2, result.length);
                                 assertEquals(1, result[0]);
                                 assertEquals(0, result[1]);
+                                counter[0]++;
                                 ctx.continueTask();
                             }
                         });
@@ -105,8 +106,9 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
                                     public void eval(TaskContext ctx) {
                                         int order = (int) ctx.variable("i").get(0);
                                         ctx.setVariable("order", order);
-                                        if(order < 9)
+                                        if (order < 9)
                                             assertEquals(9 - order, ctx.resultAsNodes().size());
+                                        counter[0]++;
                                         ctx.continueTask();
                                     }
                                 })
@@ -126,27 +128,109 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
                                                     public void eval(TaskContext ctx) {
                                                         int i = (int) ctx.variable("i").get(0);
                                                         assert (IntStream.of((int[]) ctx.resultAsNodes().get(0).get("position")).anyMatch(x -> x == i));
+                                                        counter[0]++;
                                                         ctx.continueTask();
                                                     }
                                                 })
                                                 .readVar("ngram")
                                                 .traverse(GRAMS_TOKENS)
+                                                .traverse(TOKEN_NAME)
                                                 .thenDo(new ActionFunction() {
                                                     @Override
                                                     public void eval(TaskContext ctx) {
-                                                        //TODO
+                                                        int order = (int) ctx.variable("order").get(0);
+                                                        int position = (int) ctx.variable("i").get(0);
+                                                        List<String> supposedResult = tokenizer2.subList(position, position + order);
+                                                        assertEquals(supposedResult.size(), ctx.resultAsStrings().size());
+                                                        for (int i = 0; i < supposedResult.size(); i++) {
+                                                            assertEquals(supposedResult.get(i), ctx.resultAsStrings().get(i));
+                                                        }
+                                                        counter[0]++;
                                                         ctx.continueTask();
                                                     }
                                                 })
                                 )
                 )
-                .println("{{result}}")
-                .travelInTime("0")
-                .println("{{result}}")
-                /**.travelInTime("10")
-                 .println("{{result}}")*/
-                .execute(graph, null);
 
+
+                .readVar("tc")
+                .thenDo(new ActionFunction() {
+                    @Override
+                    public void eval(TaskContext ctx) {
+                        int i=0;
+                        ctx.continueTask();
+                    }
+                })
+                .travelInTime("0")
+                .thenDo(new ActionFunction() {
+                    @Override
+                    public void eval(TaskContext ctx) {
+                        int i=0;
+                        ctx.continueTask();
+                    }
+                })
+                .traverse("plugin")
+                .loop("1", Integer.toString(MAXIMUM_ORDER_OF_N),
+                        newTask()
+                                .traverse("{{i}}")
+                                .thenDo(new ActionFunction() {
+                                    @Override
+                                    public void eval(TaskContext ctx) {
+                                        int order = (int) ctx.variable("i").get(0);
+                                        ctx.setVariable("order", order);
+                                        if (order < 8)
+                                            assertEquals(8 - order, ctx.resultAsNodes().size());
+                                        counter[0]++;
+                                        ctx.continueTask();
+                                    }
+                                })
+                                .forEach(
+                                        thenDo(new ActionFunction() {
+                                            @Override
+                                            public void eval(TaskContext ctx) {
+                                                Node ngram = ctx.resultAsNodes().get(0);
+                                                assertEquals((int) ctx.variable("order").get(0), (int) ngram.get("order"));
+                                                ctx.continueTask();
+                                            }
+                                        })
+                                                .setAsVar("ngram")
+                                                .traverse(NGRAM_INVERTED_INDEX_RELATION, "id", "{{tcid}}")
+                                                .thenDo(new ActionFunction() {
+                                                    @Override
+                                                    public void eval(TaskContext ctx) {
+                                                        int i = (int) ctx.variable("i").get(0);
+                                                        assert (IntStream.of((int[]) ctx.resultAsNodes().get(0).get("position")).anyMatch(x -> x == i));
+                                                        counter[0]++;
+                                                        ctx.continueTask();
+                                                    }
+                                                })
+                                                .readVar("ngram")
+                                                .traverse(GRAMS_TOKENS)
+                                                .traverse(TOKEN_NAME)
+                                                .thenDo(new ActionFunction() {
+                                                    @Override
+                                                    public void eval(TaskContext ctx) {
+                                                        int order = (int) ctx.variable("order").get(0);
+                                                        int position = (int) ctx.variable("i").get(0);
+                                                        List<String> supposedResult = tokenizer.subList(position, position + order);
+                                                        assertEquals(supposedResult.size(), ctx.resultAsStrings().size());
+                                                        for (int i = 0; i < supposedResult.size(); i++) {
+                                                            assertEquals(supposedResult.get(i), ctx.resultAsStrings().get(i));
+                                                        }
+                                                        counter[0]++;
+                                                        ctx.continueTask();
+                                                    }
+                                                })
+                                )
+                )
+
+
+
+
+
+
+                .execute(graph, null);
+        System.out.println(counter[0]);
         removeGraph();
     }
 }
