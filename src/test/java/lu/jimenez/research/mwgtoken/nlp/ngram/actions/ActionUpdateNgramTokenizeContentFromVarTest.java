@@ -1,12 +1,12 @@
 /**
  * Copyright 2017 Matthieu Jimenez.  All rights reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,20 +17,27 @@ package lu.jimenez.research.mwgtoken.nlp.ngram.actions;
 
 import lu.jimenez.research.mwgtoken.core.task.RelationTask;
 import lu.jimenez.research.mwgtoken.nlp.ActionTest;
+import lu.jimenez.research.mwgtoken.tokenization.TokenizerFactory;
 import org.junit.jupiter.api.Test;
 import org.mwg.Callback;
+import org.mwg.Node;
 import org.mwg.task.ActionFunction;
 import org.mwg.task.TaskContext;
 
-import static lu.jimenez.research.mwgtoken.core.CoreConstants.ENTRY_POINT_INDEX;
-import static lu.jimenez.research.mwgtoken.core.CoreConstants.TOKENIZE_CONTENT_RELATION;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import static lu.jimenez.research.mwgtoken.core.CoreConstants.*;
 import static lu.jimenez.research.mwgtoken.core.actions.MwdbTokenActions.initializeVocabulary;
 import static lu.jimenez.research.mwgtoken.core.actions.MwdbTokenActions.tokenizeStringsUsingTokenizer;
+import static lu.jimenez.research.mwgtoken.nlp.ngram.NgramConstants.*;
 import static lu.jimenez.research.mwgtoken.nlp.ngram.actions.MwdbNgramActions.initializeNgram;
 import static lu.jimenez.research.mwgtoken.nlp.ngram.actions.MwdbNgramActions.updateNgramTokenizedContentFromVar;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mwg.Constants.BEGINNING_OF_TIME;
 import static org.mwg.Constants.END_OF_TIME;
 import static org.mwg.task.Tasks.newTask;
+import static org.mwg.task.Tasks.thenDo;
 
 class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
 
@@ -42,6 +49,10 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
     @Test
     public void test() {
         initGraph();
+        final int[] counter = {0};
+        TokenizerFactory tf = new TokenizerFactory("");
+        final List<String> tokenizer = tf.create(text1, null).getTokens();
+        final List<String> tokenizer2 = tf.create(text11, null).getTokens();
         newTask()
                 .travelInTime("0")
                 .then(initializeVocabulary())
@@ -64,20 +75,21 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
                 .thenDo(new ActionFunction() {
                     @Override
                     public void eval(TaskContext ctx) {
-                        int i = 0;
-ctx.continueTask();
-
+                        ctx.setVariable("tcid", ctx.resultAsNodes().get(0).id());
+                        ctx.continueTask();
                     }
                 })
                 .traverse("plugin")
                 .thenDo(new ActionFunction() {
                     @Override
                     public void eval(TaskContext ctx) {
-                        int i = 0;
+                        assertEquals(NODE_TYPE_NGRAM_TOKENIZED_CONTENT, ctx.resultAsNodes().get(0).get(NODE_TYPE));
                         ctx.resultAsNodes().get(0).timepoints(BEGINNING_OF_TIME, END_OF_TIME, new Callback<long[]>() {
                             @Override
                             public void on(long[] result) {
-                                result.toString();
+                                assertEquals(2, result.length);
+                                assertEquals(1, result[0]);
+                                assertEquals(0, result[1]);
                                 ctx.continueTask();
                             }
                         });
@@ -85,11 +97,54 @@ ctx.continueTask();
 
                     }
                 })
+                .loop("1", Integer.toString(MAXIMUM_ORDER_OF_N),
+                        newTask()
+                                .traverse("{{i}}")
+                                .thenDo(new ActionFunction() {
+                                    @Override
+                                    public void eval(TaskContext ctx) {
+                                        int order = (int) ctx.variable("i").get(0);
+                                        ctx.setVariable("order", order);
+                                        if(order < 9)
+                                            assertEquals(9 - order, ctx.resultAsNodes().size());
+                                        ctx.continueTask();
+                                    }
+                                })
+                                .forEach(
+                                        thenDo(new ActionFunction() {
+                                            @Override
+                                            public void eval(TaskContext ctx) {
+                                                Node ngram = ctx.resultAsNodes().get(0);
+                                                assertEquals((int) ctx.variable("order").get(0), (int) ngram.get("order"));
+                                                ctx.continueTask();
+                                            }
+                                        })
+                                                .setAsVar("ngram")
+                                                .traverse(NGRAM_INVERTED_INDEX_RELATION, "id", "{{tcid}}")
+                                                .thenDo(new ActionFunction() {
+                                                    @Override
+                                                    public void eval(TaskContext ctx) {
+                                                        int i = (int) ctx.variable("i").get(0);
+                                                        assert (IntStream.of((int[]) ctx.resultAsNodes().get(0).get("position")).anyMatch(x -> x == i));
+                                                        ctx.continueTask();
+                                                    }
+                                                })
+                                                .readVar("ngram")
+                                                .traverse(GRAMS_TOKENS)
+                                                .thenDo(new ActionFunction() {
+                                                    @Override
+                                                    public void eval(TaskContext ctx) {
+                                                        //TODO
+                                                        ctx.continueTask();
+                                                    }
+                                                })
+                                )
+                )
                 .println("{{result}}")
                 .travelInTime("0")
                 .println("{{result}}")
                 /**.travelInTime("10")
-                .println("{{result}}")*/
+                 .println("{{result}}")*/
                 .execute(graph, null);
 
         removeGraph();
