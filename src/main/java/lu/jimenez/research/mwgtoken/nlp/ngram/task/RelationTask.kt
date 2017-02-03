@@ -112,15 +112,7 @@ object RelationTask {
                                 .setAsVar("time")
                                 .travelInTime("{{time}}")
                                 .then(readUpdatedTimeVar(tokenizedContent))
-                                .thenDo { ctx ->
-                                    val i =0
-                                    ctx.continueTask()
-                                }
                                 .addVarToRelation(TOKENIZE_CONTENT_PLUGIN, ngramtokenizedContent, NODE_TYPE)
-                                .thenDo { ctx ->
-                                    val i =0
-                                    ctx.continueTask()
-                                }
                 )
                 .readVar(ngramtokenizedContent)
 
