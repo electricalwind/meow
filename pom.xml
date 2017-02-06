@@ -22,11 +22,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>lu.jimenez.research</groupId>
-    <artifactId>mwgtoken</artifactId>
+    <artifactId>miaou</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
     <url>https://github.com/electricalwind/MwdbToken</url>
-    <name>MWG Token</name>
+    <name>Miaou: A language processing plugin for GreyCat</name>
 
 
     <licenses>
@@ -41,7 +41,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.0.6</kotlin.version>
         <dokka.version>0.9.9</dokka.version>
-        <mwg.version>11-SNAPSHOT</mwg.version>
+        <greycat.version>12-SNAPSHOT</greycat.version>
         <header.path>${basedir}/HEADER</header.path>
     </properties>
 
@@ -76,9 +76,9 @@
             <version>1.0.0-M3</version>
         </dependency>
         <dependency>
-            <groupId>org.kevoree.mwg</groupId>
-            <artifactId>core</artifactId>
-            <version>${mwg.version}</version>
+            <groupId>com.datathings</groupId>
+            <artifactId>greycat</artifactId>
+            <version>${greycat.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.microutils</groupId>
@@ -95,11 +95,11 @@
             <artifactId>my-little-plugin</artifactId>
             <version>1.0</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.kevoree.mwg.plugins</groupId>
             <artifactId>memory</artifactId>
             <version>11-SNAPSHOT</version>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <build>

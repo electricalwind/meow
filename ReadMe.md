@@ -1,13 +1,13 @@
-# MWG Token
+# Miaou: A language Processing plugin for Greycat
 
 
-![MWDB-version](https://img.shields.io/badge/MWDB--version-11--SNAPSHOT-green.svg)
+![Greycat-version](https://img.shields.io/badge/Greycat--version-12--SNAPSHOT-green.svg)
 
 ![version](https://img.shields.io/badge/version-1.0-blue.svg)
 
-This library bring additional functionality to the [MWDB](https://github.com/kevoree-modeling/mwDB) project. 
-This library is compatible with the latest MWDB api, that will be introduced in the 11th version. 
-Compatibility with previous versions of MWDB api is not supported.
+This library bring additional functionality to the [Greycat](https://github.com/datathings/greycat) project. 
+This library is compatible with the latest Greycat api, that will be introduced in the 12th version. 
+Compatibility with previous versions of Greycat(formerly MWDB) api is not supported.
 
 
 ### Token?
