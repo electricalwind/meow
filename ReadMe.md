@@ -1,11 +1,11 @@
-# Miaou: A language Processing plugin for Greycat
+# Meow: A language Processing plugin for GreyCat
 
 
-![Greycat-version](https://img.shields.io/badge/Greycat--version-12--SNAPSHOT-green.svg)
+![GreyCat-version](https://img.shields.io/badge/Greycat--version-12--SNAPSHOT-green.svg)
 
 ![version](https://img.shields.io/badge/version-1.0-blue.svg)
 
-This library bring additional functionality to the [Greycat](https://github.com/datathings/greycat) project. 
+This library bring additional functionality to the [GreyCat](https://github.com/datathings/greycat) project. 
 This library is compatible with the latest Greycat api, that will be introduced in the 12th version. 
 Compatibility with previous versions of Greycat(formerly MWDB) api is not supported.
 
