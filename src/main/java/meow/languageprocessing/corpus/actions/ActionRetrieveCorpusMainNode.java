@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@ import greycat.plugin.SchedulerAffinity;
 import meow.languageprocessing.corpus.exception.UninitializeCorpusMainNodeException;
 import meow.languageprocessing.corpus.task.CorpusTask;
 
-import static meow.languageprocessing.corpus.actions.MwdbCorpusActionNames.RETRIEVE_CORPUS_MAIN_NODE;
+import static meow.languageprocessing.corpus.actions.CorpusActionNames.RETRIEVE_CORPUS_MAIN_NODE;
 
 public class ActionRetrieveCorpusMainNode implements Action {
     public void eval(final TaskContext ctx) {

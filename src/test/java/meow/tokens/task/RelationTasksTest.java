@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,8 +26,8 @@ import static greycat.Tasks.newTask;
 import static greycat.Tasks.thenDo;
 import static meow.tokens.TokensConstants.ENTRY_POINT_INDEX;
 import static meow.tokens.TokensConstants.TOKENIZE_CONTENT_NAME;
-import static meow.tokens.actions.MwdbTokenActions.initializeVocabulary;
-import static meow.tokens.actions.MwdbTokenActions.tokenizeStringsUsingTokenizer;
+import static meow.tokens.actions.TokenActions.initializeVocabulary;
+import static meow.tokens.actions.TokenActions.tokenizeStringsUsingTokenizer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 

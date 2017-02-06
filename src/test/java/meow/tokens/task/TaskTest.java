@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@ package meow.tokens.task;
 
 import greycat.*;
 import greycat.scheduler.TrampolineScheduler;
-import meow.tokens.actions.MwdbTokenActionPlugin;
+import meow.tokens.TokenPlugin;
 import mylittleplugin.MyLittleActionPlugin;
 
 import static greycat.Constants.BEGINNING_OF_TIME;
@@ -32,7 +32,7 @@ public abstract  class TaskTest {
 
     protected void initGraph() {
         graph = new GraphBuilder()
-                .withPlugin(new MwdbTokenActionPlugin())
+                .withPlugin(new TokenPlugin())
                 .withPlugin(new MyLittleActionPlugin())
                 .withScheduler(new TrampolineScheduler()).build();
         final TaskTest selfPointer = this;
@@ -53,7 +53,7 @@ public abstract  class TaskTest {
     protected void initGraphO() {
         graph = new GraphBuilder()
                 .withMemorySize(1000000)
-                .withPlugin(new MwdbTokenActionPlugin())
+                .withPlugin(new TokenPlugin())
                 .withPlugin(new MyLittleActionPlugin())
                 //.withPlugin(new OffHeapMemoryPlugin())
                 .withScheduler(new TrampolineScheduler())

@@ -1,7 +1,7 @@
 # Meow: A language Processing plugin for GreyCat
 
 
-![GreyCat-version](https://img.shields.io/badge/Greycat--version-12--SNAPSHOT-green.svg)
+![GreyCat-version](https://img.shields.io/badge/GreyCat--version-12--SNAPSHOT-green.svg)
 
 ![version](https://img.shields.io/badge/version-1.0-blue.svg)
 

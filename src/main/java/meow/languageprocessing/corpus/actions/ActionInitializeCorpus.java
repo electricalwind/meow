@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ import greycat.*;
 import greycat.plugin.SchedulerAffinity;
 import meow.languageprocessing.corpus.task.CorpusTask;
 
-import static meow.languageprocessing.corpus.actions.MwdbCorpusActionNames.INITIALIZE_CORPUS;
+import static meow.languageprocessing.corpus.actions.CorpusActionNames.INITIALIZE_CORPUS;
 
 public class ActionInitializeCorpus implements Action {
     @Override

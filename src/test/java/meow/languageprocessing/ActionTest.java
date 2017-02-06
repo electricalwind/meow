@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package meow.languageprocessing;
 import greycat.*;
 import greycat.scheduler.NoopScheduler;
 import greycat.scheduler.TrampolineScheduler;
-import meow.tokens.actions.MwdbTokenActionPlugin;
-import meow.languageprocessing.ngram.actions.MwdbNgramActionPlugin;
+import meow.tokens.TokenPlugin;
+import meow.languageprocessing.ngram.NgramPlugin;
 import mylittleplugin.MyLittleActionPlugin;
 
 import static greycat.Constants.BEGINNING_OF_TIME;
@@ -33,9 +33,9 @@ public class ActionTest {
 
     protected void initGraph() {
         graph = new GraphBuilder()
-                .withPlugin(new MwdbTokenActionPlugin())
+                .withPlugin(new TokenPlugin())
                 .withPlugin(new MyLittleActionPlugin())
-                .withPlugin(new MwdbNgramActionPlugin())
+                .withPlugin(new NgramPlugin())
                 .withScheduler(new TrampolineScheduler()).build();
         final ActionTest selfPointer = this;
         graph.connect(new Callback<Boolean>() {
@@ -55,9 +55,9 @@ public class ActionTest {
     protected void initGraphO() {
         graph = new GraphBuilder()
                 .withMemorySize(1000000)
-                .withPlugin(new MwdbTokenActionPlugin())
+                .withPlugin(new TokenPlugin())
                 .withPlugin(new MyLittleActionPlugin())
-                .withPlugin(new MwdbNgramActionPlugin())
+                .withPlugin(new NgramPlugin())
                 //.withPlugin(new OffHeapMemoryPlugin())
                 .withScheduler(new NoopScheduler()).build();
         final ActionTest selfPointer = this;

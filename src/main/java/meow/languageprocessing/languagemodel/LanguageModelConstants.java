@@ -13,21 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package meow.languageprocessing.corpus;
+package meow.languageprocessing.languagemodel;
 
-public class CorpusConstants {
-    public final static String CORPUS_MAIN_NODE = "CorpusMainNode";
-    public final static String CORPUS_RELATION = "Corpus";
-    public final static String CORPUS_NAME ="name";
+public class LanguageModelConstants {
 
-    public final static String CORPUS_TO_TOKENIZEDCONTENTS_RELATION = "tokenizedContents";
+    public final static String NGRAM_CORPUS_NODE_TYPE = "NgramCorpusNode";
 
-    public final static String CORPUS_VERSION = "v";
-
-    public final static String NODE_TYPE_CORPUS = "corpus";
-
-    public final static String CORPUS_PLUGIN = "plugin";
-
-    public final static String CORPUS_PLUGIN_INDEX = "name";
-
+    public final static String NGRAM_CORPUS_NODE_CORPUS = "corpus";
 }

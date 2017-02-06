@@ -13,21 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package meow.languageprocessing.corpus;
+package meow.languageprocessing.corpus.actions;
 
-public class CorpusConstants {
-    public final static String CORPUS_MAIN_NODE = "CorpusMainNode";
-    public final static String CORPUS_RELATION = "Corpus";
-    public final static String CORPUS_NAME ="name";
+public class CorpusActionNames {
 
-    public final static String CORPUS_TO_TOKENIZEDCONTENTS_RELATION = "tokenizedContents";
-
-    public final static String CORPUS_VERSION = "v";
-
-    public final static String NODE_TYPE_CORPUS = "corpus";
-
-    public final static String CORPUS_PLUGIN = "plugin";
-
-    public final static String CORPUS_PLUGIN_INDEX = "name";
-
+    public static String INITIALIZE_CORPUS = "initializeCorpus";
+    public static String RETRIEVE_CORPUS_MAIN_NODE = "retrieveCorpusMainNode";
+    public static String GET_OR_CREATE_CORPUS = "getOrCreateCorpus";
+    public static String ADD_REMOVE_TOKENIZE_CONTENTS_OF_CORPUS = "addRemoveTokenizeContentOfCorpus";
 }

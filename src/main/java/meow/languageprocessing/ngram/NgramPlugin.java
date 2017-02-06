@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package meow.languageprocessing.ngram.actions;
+package meow.languageprocessing.ngram;
 
 import greycat.Action;
 import greycat.Graph;
 import greycat.Type;
 import greycat.plugin.ActionFactory;
 import greycat.plugin.Plugin;
+import meow.languageprocessing.ngram.actions.NgramActionNames;
 
-import static meow.languageprocessing.ngram.actions.MwdbNgramActions.*;
+import static meow.languageprocessing.ngram.actions.NgramActions.*;
 
-public class MwdbNgramActionPlugin implements Plugin {
+public class NgramPlugin implements Plugin {
     @Override
     public void start(Graph graph) {
         graph.actionRegistry()
-                .declaration(MwdbNgramActionNames.INITIALIZE_NGRAM)
+                .declaration(NgramActionNames.INITIALIZE_NGRAM)
                 .setParams()
                 .setDescription("Create the Ngram Main Node")
                 .setFactory(new ActionFactory() {
@@ -38,7 +39,7 @@ public class MwdbNgramActionPlugin implements Plugin {
                 });
 
         graph.actionRegistry()
-                .declaration(MwdbNgramActionNames.RETRIEVE_NGRAM_MAIN_NODE)
+                .declaration(NgramActionNames.RETRIEVE_NGRAM_MAIN_NODE)
                 .setParams()
                 .setDescription("retrieve the Ngram Main Node")
                 .setFactory(new ActionFactory() {
@@ -49,7 +50,7 @@ public class MwdbNgramActionPlugin implements Plugin {
                 });
 
         graph.actionRegistry()
-                .declaration(MwdbNgramActionNames.GET_OR_CREATE_NGRAM_FROM_VAR)
+                .declaration(NgramActionNames.GET_OR_CREATE_NGRAM_FROM_VAR)
                 .setParams(Type.STRING)
                 .setDescription("get or create a n gram corresponding to the tokens store in the given var")
                 .setFactory(new ActionFactory() {
@@ -60,7 +61,7 @@ public class MwdbNgramActionPlugin implements Plugin {
                 });
 
         graph.actionRegistry()
-                .declaration(MwdbNgramActionNames.GET_OR_CREATE_NGRAM_FROM_STRING)
+                .declaration(NgramActionNames.GET_OR_CREATE_NGRAM_FROM_STRING)
                 .setParams(Type.STRING_ARRAY)
                 .setDescription("get or create a n gram corresponding to the gram given")
                 .setFactory(new ActionFactory() {
@@ -73,7 +74,7 @@ public class MwdbNgramActionPlugin implements Plugin {
                 });
 
         graph.actionRegistry()
-                .declaration(MwdbNgramActionNames.UPDATE_NGRAM_TC_FROM_VAR)
+                .declaration(NgramActionNames.UPDATE_NGRAM_TC_FROM_VAR)
                 .setParams(Type.STRING)
                 .setDescription("create or update for all time the ngram version of tokenized content present in var")
                 .setFactory(new ActionFactory() {

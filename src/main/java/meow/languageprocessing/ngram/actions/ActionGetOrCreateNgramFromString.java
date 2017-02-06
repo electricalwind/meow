@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,7 +53,7 @@ public class ActionGetOrCreateNgramFromString implements Action {
     }
 
     public void serialize(StringBuilder builder) {
-        builder.append(MwdbNgramActionNames.GET_OR_CREATE_NGRAM_FROM_STRING);
+        builder.append(NgramActionNames.GET_OR_CREATE_NGRAM_FROM_STRING);
         builder.append(Constants.TASK_PARAM_OPEN);
         TaskHelper.serializeStringParams(_grams,builder);
         builder.append(Constants.TASK_PARAM_CLOSE);

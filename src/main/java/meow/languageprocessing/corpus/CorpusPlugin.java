@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package meow.languageprocessing.corpus.actions;
+package meow.languageprocessing.corpus;
 
 
 import greycat.Action;
@@ -22,10 +22,10 @@ import greycat.Type;
 import greycat.plugin.ActionFactory;
 import greycat.plugin.Plugin;
 
-import static meow.languageprocessing.corpus.actions.MwdbCorpusActionNames.*;
-import static meow.languageprocessing.corpus.actions.MwdbCorpusActions.*;
+import static meow.languageprocessing.corpus.actions.CorpusActionNames.*;
+import static meow.languageprocessing.corpus.actions.CorpusActions.*;
 
-public class MwdbCorpusActionPlugin implements Plugin {
+public class CorpusPlugin implements Plugin {
     @Override
     public void start(Graph graph) {
         graph.actionRegistry()

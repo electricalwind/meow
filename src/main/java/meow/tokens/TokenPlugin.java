@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package meow.tokens.actions;
+package meow.tokens;
 
 
 import greycat.Action;
@@ -21,16 +21,17 @@ import greycat.Graph;
 import greycat.Type;
 import greycat.plugin.ActionFactory;
 import greycat.plugin.Plugin;
+import meow.tokens.actions.TokenActionNames;
 
-import static meow.tokens.actions.MwdbTokenActions.*;
+import static meow.tokens.actions.TokenActions.*;
 
-public class MwdbTokenActionPlugin implements Plugin {
+public class TokenPlugin implements Plugin {
 
 
     public void start(Graph graph) {
 
         graph.actionRegistry()
-                .declaration(MwdbTokenActionNames.INITIALIZE_VOCABULARY)
+                .declaration(TokenActionNames.INITIALIZE_VOCABULARY)
                 .setParams()
                 .setDescription("Initialize the plugin by creating a Vocabulary Node")
                 .setFactory(new ActionFactory() {
@@ -41,7 +42,7 @@ public class MwdbTokenActionPlugin implements Plugin {
                 });
 
         graph.actionRegistry()
-                .declaration(MwdbTokenActionNames.RETRIEVE_VOCABULARY_NODE)
+                .declaration(TokenActionNames.RETRIEVE_VOCABULARY_NODE)
                 .setParams()
                 .setDescription("retrieve the Vocabulary Node")
                 .setFactory(new ActionFactory() {
@@ -53,7 +54,7 @@ public class MwdbTokenActionPlugin implements Plugin {
 
 
         graph.actionRegistry()
-                .declaration(MwdbTokenActionNames.GET_OR_CREATE_TOKENS_FROM_STRING)
+                .declaration(TokenActionNames.GET_OR_CREATE_TOKENS_FROM_STRING)
                 .setParams(Type.STRING_ARRAY)
                 .setDescription("Retrieve all the node corresponding to a token and create one if not existing")
                 .setFactory(new ActionFactory() {
@@ -65,7 +66,7 @@ public class MwdbTokenActionPlugin implements Plugin {
                     }
                 });
         graph.actionRegistry()
-                .declaration(MwdbTokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER)
+                .declaration(TokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER)
                 .setParams(Type.STRING, Type.STRING, Type.STRING, Type.STRING_ARRAY)
                 .setDescription("Tokenize a content and put the tokenizer in result, 1)tokenizer type, 2)preprocessor,3)type of content,4) content")
                 .setFactory(new ActionFactory() {
@@ -78,7 +79,7 @@ public class MwdbTokenActionPlugin implements Plugin {
                 });
 
         graph.actionRegistry()
-                .declaration(MwdbTokenActionNames.CREATE_OR_UPDATE_TOKENIZE_RELATIONS_TO_NODES)
+                .declaration(TokenActionNames.CREATE_OR_UPDATE_TOKENIZE_RELATIONS_TO_NODES)
                 .setParams(Type.STRING, Type.STRING, Type.STRING_ARRAY)
                 .setDescription("update or create a tokenized Content relation in one or several nodes with the given index")
                 .setFactory(new ActionFactory() {
@@ -91,7 +92,7 @@ public class MwdbTokenActionPlugin implements Plugin {
                 });
 
         graph.actionRegistry()
-                .declaration(MwdbTokenActionNames.REBUILDING_TOKENIZE_CONTENTS)
+                .declaration(TokenActionNames.REBUILDING_TOKENIZE_CONTENTS)
                 .setParams(Type.STRING)
                 .setDescription("Rebuild the tokenized content present in a var in a String using space, 3 results are present per tokenizeContents, 1) name, 2)type, 3) Content ")
                 .setFactory(new ActionFactory() {

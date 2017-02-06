@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,10 +19,10 @@ import greycat.*
 import greycat.Constants.BEGINNING_OF_TIME
 import greycat.Tasks.*
 import greycat.struct.Relation
+import meow.languageprocessing.corpus.CorpusConstants.*
+import meow.languageprocessing.corpus.actions.CorpusActions
 import meow.tokens.TokensConstants.*
 import meow.tokens.task.UtilTask.checkNodesType
-import meow.languageprocessing.corpus.CorpusConstants.*
-import meow.languageprocessing.corpus.actions.MwdbCorpusActions
 import mylittleplugin.MyLittleActions.*
 
 
@@ -55,7 +55,7 @@ object CorpusTask {
     @JvmStatic
     fun getOrCreateCorpus(corpusName: String): Task {
         return newTask()
-                .then(MwdbCorpusActions.retrieveCorpusMainNode())
+                .then(CorpusActions.retrieveCorpusMainNode())
                 .traverse(CORPUS_RELATION, CORPUS_NAME, corpusName)
                 .then(ifEmptyThen(
                         createCorpus(corpusName)
@@ -70,9 +70,10 @@ object CorpusTask {
                                 .createNode()
                                 .setAttribute(CORPUS_NAME, Type.STRING, corpusName)
                                 .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_CORPUS)
+                                .setAttribute(CORPUS_VERSION,Type.INT,"0")
                                 .timeSensitivity("-1", "0")
                                 .defineAsVar("corpusNode")
-                                .then(MwdbCorpusActions.retrieveCorpusMainNode())
+                                .then(CorpusActions.retrieveCorpusMainNode())
                                 .defineAsVar("corpusMain")
                                 .addVarToRelation(CORPUS_RELATION, "corpusNode", CORPUS_NAME)
                                 .readVar("corpusNode")
@@ -83,8 +84,14 @@ object CorpusTask {
     @JvmStatic
     fun addTokenizeContentToCorpus(tokenizeContentVar: String, corpusName: String): Task {
         return newTask()
-                .then(MwdbCorpusActions.getOrCreateCorpus(corpusName))
+                .then(CorpusActions.getOrCreateCorpus(corpusName))
                 .defineAsVar("corpus")
+                .thenDo { ctx ->
+                    val corpus = ctx.resultAsNodes()[0]
+                    val previous = corpus.get(CORPUS_VERSION) as Int
+                    corpus.set(CORPUS_VERSION,Type.INT,previous+1)
+                    ctx.continueTask()
+                }
                 .pipe(checkNodesType(tokenizeContentVar, NODE_TYPE_TOKENIZE_CONTENT))
                 .readVar(tokenizeContentVar)
                 .forEach(
@@ -112,8 +119,14 @@ object CorpusTask {
     fun removeTokenizeContentFromCorpus(tokenizeContentVar: String, corpusName: String): Task {
 
         return newTask()
-                .then(MwdbCorpusActions.getOrCreateCorpus(corpusName))
+                .then(CorpusActions.getOrCreateCorpus(corpusName))
                 .defineAsVar("corpus")
+                .thenDo { ctx ->
+                    val corpus = ctx.resultAsNodes()[0]
+                    val previous = corpus.get(CORPUS_VERSION) as Int
+                    corpus.set(CORPUS_VERSION,Type.INT,previous+1)
+                    ctx.continueTask()
+                }
                 .pipe(checkNodesType(tokenizeContentVar, NODE_TYPE_TOKENIZE_CONTENT))
                 .readVar(tokenizeContentVar)
                 .forEach(

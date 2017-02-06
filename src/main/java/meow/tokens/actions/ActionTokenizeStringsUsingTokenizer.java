@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,7 +48,7 @@ public class ActionTokenizeStringsUsingTokenizer implements Action {
     }
 
     public void serialize(StringBuilder builder) {
-        builder.append(MwdbTokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER);
+        builder.append(TokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER);
         builder.append(Constants.TASK_PARAM_OPEN);
         TaskHelper.serializeString(_tokenizer, builder, true);
         builder.append(Constants.TASK_PARAM_SEP);
