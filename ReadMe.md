@@ -1,4 +1,4 @@
-# Miaou: A language Processing plugin for Greycat
+# Miaou: A language Processing plugin for GreyCat
 
 
 ![Greycat-version](https://img.shields.io/badge/Greycat--version-12--SNAPSHOT-green.svg)
