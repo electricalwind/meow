@@ -22,11 +22,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>lu.jimenez.research</groupId>
-    <artifactId>miaou</artifactId>
+    <artifactId>meow</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
-    <url>https://github.com/electricalwind/MwdbToken</url>
-    <name>Miaou: A language processing plugin for GreyCat</name>
+    <url>https://github.com/electricalwind/meow</url>
+    <name>Meow: A language processing plugin for GreyCat</name>
 
 
     <licenses>
