@@ -35,14 +35,21 @@ object NgramCorpusNodeTask {
                 .then(ifEmptyThen(
                         createNgramCorpus()
                 ))
-
                 .thenDo { ctx ->
+                    //update
                     val node = ctx.resultAsNodes()[0] as NgramCorpusNode
                     node.learn(Callback {
                         ctx.continueTask()
                     }
                     )
                 }
+    }
+
+    fun getNgramCorpusWithoutUpdateNorCreation(corpusName: String): Task {
+        return newTask()
+                .then(getOrCreateCorpus(corpusName))
+                .defineAsVar("corpus")
+                .traverse(CORPUS_PLUGIN, CORPUS_PLUGIN_INDEX, NGRAM_CORPUS_NODE_TYPE)
     }
 
     fun countNgramOccurenceInCorpus(ngramCorpusVar: String, nGramToCount: String): Task {

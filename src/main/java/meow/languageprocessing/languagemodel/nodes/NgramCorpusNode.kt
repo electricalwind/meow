@@ -112,6 +112,8 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
             //if no corpus attach no need to continue
             if (father.size != 1) throw RuntimeException("No corpus declared for this NgramCorpus Node")
 
+            this.graph().resolver().externalLock(this)
+
             //retrieve the corpus relation is supposed to be of size one
             val corpus = father[0]
 
@@ -324,6 +326,7 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                     }
                     )
                     .execute(graph(), {
+                        this.graph().resolver().externalUnlock(this)
                         done.on(true)
                     })
         })
