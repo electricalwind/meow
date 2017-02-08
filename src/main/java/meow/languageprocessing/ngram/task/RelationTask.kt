@@ -23,8 +23,8 @@ import greycat.struct.Relation
 import meow.languageprocessing.ngram.NgramConstants.*
 import meow.languageprocessing.ngram.actions.NgramActions.getOrCreateNgramFromVar
 import meow.tokens.TokensConstants.*
-import meow.tokens.task.UtilTask.checkNodesType
 import meow.utils.MinimunEditDistance
+import meow.utils.UtilTask.checkNodesType
 import mylittleplugin.MyLittleActions.*
 
 
@@ -133,7 +133,7 @@ object RelationTask {
                                 .forEach(
                                         newTask()
                                                 .defineAsVar("ngram")
-                                                .traverse(NGRAM_INVERTED_INDEX_RELATION, "id", "{{$tokenizedContentId}}")
+                                                .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{$tokenizedContentId}}")
                                                 .then(
                                                         ifEmptyThenElse(
                                                                 newTask()
@@ -141,13 +141,13 @@ object RelationTask {
                                                                                 executeAtWorldAndTime("0", "$BEGINNING_OF_TIME",
                                                                                         newTask()
                                                                                                 .createNode()
-                                                                                                .setAttribute("id", Type.LONG, "{{$tokenizedContentId}}")
+                                                                                                .setAttribute(II_TC, Type.LONG, "{{$tokenizedContentId}}")
                                                                                                 .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_INVERTED_INDEX)
                                                                                                 .setAttribute("type", Type.STRING, "{{$tokenizedContentType}}")
                                                                                                 .defineAsVar("invertedIndex")
                                                                                                 .addVarToRelation(INVERTED_NGRAM_INDEX_RELATION, "ngram")
                                                                                                 .readVar("ngram")
-                                                                                                .addVarToRelation(NGRAM_INVERTED_INDEX_RELATION, "invertedIndex", "id")
+                                                                                                .addVarToRelation(NGRAM_INVERTED_INDEX_RELATION, "invertedIndex", II_TC)
                                                                                                 .readVar("invertedIndex")
                                                                                 )
                                                                         )
@@ -235,7 +235,7 @@ object RelationTask {
                                                 MinimunEditDistance.Modification.Suppression -> {
                                                     relation.delete(newIndex)
                                                     newTask().lookup("${action.first}")
-                                                            .traverse(NGRAM_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
+                                                            .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "$relationNodeId")
                                                             .thenDo {
                                                                 ctx ->
                                                                 val node = ctx.resultAsNodes()[0]
@@ -253,7 +253,7 @@ object RelationTask {
                                                     relation.insert(newIndex, action.first)
                                                     newTask().lookup("${action.first}")
                                                             .defineAsVar("token")
-                                                            .traverse(NGRAM_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
+                                                            .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "$relationNodeId")
                                                             .then(
                                                                     ifEmptyThen(
                                                                             newTask()
@@ -261,12 +261,12 @@ object RelationTask {
                                                                                             executeAtWorldAndTime("0", "$BEGINNING_OF_TIME",
                                                                                                     newTask()
                                                                                                             .createNode()
-                                                                                                            .setAttribute("id", Type.LONG, "$relationNodeId")
+                                                                                                            .setAttribute(II_TC, Type.LONG, "$relationNodeId")
                                                                                                             .setAttribute("type", Type.STRING, "$type")
                                                                                                             .defineAsVar("invertedIndex")
                                                                                                             .addVarToRelation(INVERTED_NGRAM_INDEX_RELATION, "token")
                                                                                                             .readVar("token")
-                                                                                                            .addVarToRelation(NGRAM_INVERTED_INDEX_RELATION, "invertedIndex", "id")
+                                                                                                            .addVarToRelation(NGRAM_INVERTED_INDEX_RELATION, "invertedIndex", II_TC)
                                                                                                             .readVar("invertedIndex")
                                                                                             )
                                                                                     )
@@ -286,7 +286,7 @@ object RelationTask {
                                                 }
                                                 MinimunEditDistance.Modification.Keep -> {
                                                     newTask().lookup("${action.first}")
-                                                            .traverse(NGRAM_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
+                                                            .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "$relationNodeId")
                                                             .thenDo { ctx ->
                                                                 val node = ctx.resultAsNodes()[0]
                                                                 val position: MutableList<Int> = (node.get("position") as IntArray?)?.toMutableList() ?: mutableListOf<Int>()

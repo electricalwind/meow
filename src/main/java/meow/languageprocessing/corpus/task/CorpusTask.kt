@@ -22,7 +22,7 @@ import greycat.struct.Relation
 import meow.languageprocessing.corpus.CorpusConstants.*
 import meow.languageprocessing.corpus.actions.CorpusActions
 import meow.tokens.TokensConstants.*
-import meow.tokens.task.UtilTask.checkNodesType
+import meow.utils.UtilTask.checkNodesType
 import mylittleplugin.MyLittleActions.*
 
 

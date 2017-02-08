@@ -122,7 +122,7 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
                                             }
                                         })
                                                 .setAsVar("ngram")
-                                                .traverse(NGRAM_INVERTED_INDEX_RELATION, "id", "{{tcid}}")
+                                                .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{tcid}}")
                                                 .thenDo(new ActionFunction() {
                                                     @Override
                                                     public void eval(TaskContext ctx) {
@@ -194,7 +194,7 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
                                             }
                                         })
                                                 .setAsVar("ngram")
-                                                .traverse(NGRAM_INVERTED_INDEX_RELATION, "id", "{{tcid}}")
+                                                .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{tcid}}")
                                                 .thenDo(new ActionFunction() {
                                                     @Override
                                                     public void eval(TaskContext ctx) {

@@ -47,4 +47,6 @@ public final class TokensConstants {
     public final static String NODE_TYPE_TOKEN = "token";
     public final static String NODE_TYPE_INVERTED_INDEX = "invertedIndex";
 
+    public final static String II_TC = "idTc";
+
 }

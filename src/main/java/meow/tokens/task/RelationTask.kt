@@ -214,7 +214,7 @@ object RelationTask {
                         MinimunEditDistance.Modification.Suppression -> {
                             relation.delete(newIndex)
                             newTask().lookup("${action.first}")
-                                    .traverse(WORD_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
+                                    .traverse(WORD_INVERTED_INDEX_RELATION, II_TC, "$relationNodeId")
                                     .thenDo {
                                         ctx ->
                                         val node = ctx.resultAsNodes()[0]
@@ -231,7 +231,7 @@ object RelationTask {
                             relation.insert(newIndex, action.first)
                             newTask().lookup("${action.first}")
                                     .defineAsVar("token")
-                                    .traverse(WORD_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
+                                    .traverse(WORD_INVERTED_INDEX_RELATION, II_TC, "$relationNodeId")
                                     .then(
                                             ifEmptyThen(
                                                     newTask()
@@ -239,12 +239,12 @@ object RelationTask {
                                                                     executeAtWorldAndTime("0", "$BEGINNING_OF_TIME",
                                                                             newTask()
                                                                                     .createNode()
-                                                                                    .setAttribute("id", Type.LONG, "$relationNodeId")
+                                                                                    .setAttribute(II_TC, Type.LONG, "$relationNodeId")
                                                                                     .setAttribute("type", Type.STRING, "$type")
                                                                                     .defineAsVar("invertedIndex")
                                                                                     .addVarToRelation(INVERTED_WORD_INDEX_RELATION, "token")
                                                                                     .readVar("token")
-                                                                                    .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex", "id")
+                                                                                    .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex",II_TC)
                                                                                     .readVar("invertedIndex")
                                                                     )
                                                             )
@@ -264,7 +264,7 @@ object RelationTask {
                         }
                         MinimunEditDistance.Modification.Keep -> {
                             newTask().lookup("${action.first}")
-                                    .traverse(WORD_INVERTED_INDEX_RELATION, "id", "$relationNodeId")
+                                    .traverse(WORD_INVERTED_INDEX_RELATION, II_TC, "$relationNodeId")
                                     .thenDo { ctx ->
                                         val node = ctx.resultAsNodes()[0]
                                         val position: MutableList<Int> = (node.get("position") as IntArray?)?.toMutableList() ?: mutableListOf<Int>()
@@ -312,7 +312,7 @@ object RelationTask {
                 .forEach(
                         newTask()
                                 .defineAsVar("token")
-                                .traverse(WORD_INVERTED_INDEX_RELATION, "id", "{{relationNodeId}}")
+                                .traverse(WORD_INVERTED_INDEX_RELATION, II_TC, "{{relationNodeId}}")
 
                                 .then(
                                         ifEmptyThenElse(
@@ -320,13 +320,13 @@ object RelationTask {
                                                         .then(executeAtWorldAndTime("0", "$BEGINNING_OF_TIME",
                                                                 newTask()
                                                                         .createNode()
-                                                                        .setAttribute("id", Type.LONG, "{{relationNodeId}}")
+                                                                        .setAttribute(II_TC, Type.LONG, "{{relationNodeId}}")
                                                                         .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_INVERTED_INDEX)
                                                                         .setAttribute("type", Type.STRING, "{{type}}")
                                                                         .defineAsVar("invertedIndex")
                                                                         .addVarToRelation(INVERTED_WORD_INDEX_RELATION, "token")
                                                                         .readVar("token")
-                                                                        .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex", "id")
+                                                                        .addVarToRelation(WORD_INVERTED_INDEX_RELATION, "invertedIndex", II_TC)
                                                                         .readVar("invertedIndex")
                                                         )
                                                         )
