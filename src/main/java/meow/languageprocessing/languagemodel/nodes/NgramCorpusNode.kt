@@ -30,14 +30,49 @@ import meow.utils.GreyCatUtilitary.keyOfLongToLongArrayMap
 
 class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) : BaseNode(p_world, p_time, p_id, p_graph) {
 
-    fun predict(doubleArray: LongArray, result: Callback<DoubleArray>) {
+    fun predict(ngramIds: LongArray, result: Callback<IntArray>) {
         val ngToII = getNgramToNgramInvertedIndex()
-        val resultArray: DoubleArray = DoubleArray(doubleArray.size, { 0.0 })
+        val resultArray: IntArray = IntArray(ngramIds.size, { 0 })
 
         if (ngToII.size() != 0) {
-            val waiter: DeferCounter = graph().newCounter(doubleArray.size)
+            val arrayOfResult = Array<MutableList<Int>>(ngramIds.size,{ mutableListOf()})
 
-            for (i in 0..doubleArray.size - 1) {
+            loopPar("0", "${ngramIds.size - 1}",
+
+                    thenDo { ctx ->
+                        val i = ctx.variable("i") as Int
+                        ctx.setVariable("iter",i)
+                        val ngramId = ngramIds[i]
+                        val iingram = ngToII[ngramId]
+                        if (iingram.isNotEmpty()) {
+                            ctx.setVariable("iingrams", iingram.joinToString(prefix = "[", separator = ",", postfix = "]"))
+                            ctx.continueWith(ctx.wrap(true))
+                        } else {
+                            ctx.continueWith(ctx.wrap(false))
+                        }
+                    }.ifThen({ ctx -> ctx.result()[0] as Boolean },
+                            newTask()
+                                    .lookupAll("{{iingrams}}")
+                                    .forEach(
+                                            thenDo { ctx ->
+                                                val i =ctx.variable("iter")[0] as Int
+                                                val ngramII = ctx.resultAsNodes()[0]
+                                                val pos = ngramII.get("position") as IntArray
+                                                arrayOfResult[i].add(pos.size)
+                                                ctx.continueTask()
+                                            }
+                                    )
+                    )
+            ).execute(graph(),
+                    {
+                        taskresult ->
+                        for(i in 0..ngramIds.size-1){
+                            resultArray[i] =arrayOfResult[i].sum()
+                        }
+                        result.on(resultArray)
+                    }
+                    )
+            /**for (i in 0..doubleArray.size - 1) {
 
                 val ngramId = doubleArray[i]
                 val arrayOfTCContainingNgram = ngToII[ngramId]
@@ -64,7 +99,7 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                     waiter.count()
                 }
             }
-            waiter.then { result.on(resultArray) }
+            waiter.then { result.on(resultArray) }*/
 
         } else {
             throw RuntimeException("Trying to predic on a empty ngramCorpus")
@@ -74,67 +109,74 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
 
     fun learn(done: Callback<Boolean>) {
         super.relation(NGRAM_CORPUS_NODE_CORPUS, Callback { father ->
+            //if no corpus attach no need to continue
             if (father.size != 1) throw RuntimeException("No corpus declared for this NgramCorpus Node")
 
+            //retrieve the corpus relation is supposed to be of size one
             val corpus = father[0]
 
-            val tcToII = getTCToNgramInvertedIndex()
-            val ngToII = getNgramToNgramInvertedIndex()
-            val tcMN = getTCMagicNumbers()
+            //retrieve all the Long LongArray Map
+            val tcToII = getTCToNgramInvertedIndex() //tokenizedContent to InvertedIndex
+            val ngToII = getNgramToNgramInvertedIndex() //ngram to InvertedIndex
+            val tcMN = getTCMagicNumbers() //tokenized Content to Magic Numbers
 
 
-            val tcCurrent = keyOfLongToLongArrayMap(tcToII).toList()
+            val tcCurrent = keyOfLongToLongArrayMap(tcToII).toList() //current tokenize Content known by the node
 
             val tcCorpusRel = (corpus.get(CORPUS_TO_TOKENIZEDCONTENTS_RELATION) as Relation)
-            val tcCorpus = tcCorpusRel.all().take(tcCorpusRel.size())
+            val tcCorpus = tcCorpusRel.all().take(tcCorpusRel.size()) //tokenize Content known by the corpus
 
-            val addedContents = tcCorpus.minus(tcCurrent)
-            val removedContents = tcCurrent.minus(tcCorpus)
-            val similarContents = tcCorpus.intersect(tcCurrent)
+            val addedContents = tcCorpus.minus(tcCurrent) //Tokenize Content present in the corpus but not known by the node
+            val removedContents = tcCurrent.minus(tcCorpus) //Tokenize Content known by the node but not present in the corpus anymore
+            val similarContents = tcCorpus.intersect(tcCurrent) //Tokenize Content known by the node and still present in the corpus
 
             newTask()
-                    .ifThen({ removedContents.isNotEmpty() },
-                            newTask().lookupAll(removedContents.joinToString(prefix = "[", separator = ",", postfix = "]"))
+                    .ifThen({ removedContents.isNotEmpty() }, //If there are tokenize content to remove
+                            newTask()
                                     .then(retrieveNgramMainNode())
                                     .traverse(NGRAM_INDEX)
-                                    .setAsVar("ngram")
-                                    .inject(removedContents.toLongArray())
-                                    .map(
+                                    .setAsVar("ngram") // retrieve all Ngram
+                                    .inject(removedContents.toLongArray())// inject content to remove
+                                    .map(//for each tokenize content
                                             newTask()
                                                     .setAsVar("toRemove")
                                                     .readVar("ngram")
-                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toRemove}}")
+                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toRemove}}") // retrieve all ngram that are using it
                                     )
-                                    .flat()
+                                    .flat() // flatten the result
                                     .thenDo { ctx ->
-                                        val taskresult = ctx.result()
-                                        taskresult.asArray().forEach {
-                                            result ->
-                                            val node = result as Node
-                                            val nodeId = node.id()
-                                            val tc = node.get(II_TC) as Long
-                                            val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
-                                            val ngramId = ngram[0]
 
-                                            ngToII.delete(ngramId, nodeId)
-                                            tcToII.delete(tc, nodeId)
-                                        }
+                                        ctx.result().asArray()
+                                                .forEach { // for all ngram inverted index retrieved
+                                                    result ->
+                                                    val node = result as Node
+                                                    val nodeId = node.id()
+                                                    val tc = node.get(II_TC) as Long
+                                                    val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
+                                                    val ngramId = ngram[0]
+
+                                                    ngToII.delete(ngramId, nodeId) //delete it from ngram map
+                                                    tcToII.delete(tc, nodeId) //delete it from tokenize Content map
+                                                }
                                         removedContents.forEach { tc ->
-                                            val values = tcMN.get(tc)
+                                            // for all content to remove
+                                            val values = tcMN.get(tc) // retrieve all magic number
                                             values.forEach { value ->
-                                                tcMN.delete(tc, value)
+                                                tcMN.delete(tc, value) //delete them
                                             }
                                         }
                                         ctx.continueTask()
                                     }
                     )
-                    .ifThen({ addedContents.isNotEmpty() },
+                    .ifThen({ addedContents.isNotEmpty() }, // If there are tokenize Content to add
                             newTask()
-                                    .lookupAll(addedContents.joinToString(prefix = "[", separator = ",", postfix = "]"))
+                                    .lookupAll(addedContents.joinToString(prefix = "[", separator = ",", postfix = "]")) //retrieve all the new tc
                                     .setAsVar("tc")
-                                    .then(updateNgramTokenizedContentFromVar("tc"))
+
+                                    .then(updateNgramTokenizedContentFromVar("tc")) //update their Ngram
+
                                     .readVar("tc")
-                                    .forEach(
+                                    .forEach(// for each tc retrieve their magic numbers and add them to the map of magic number
                                             thenDo { ctx ->
                                                 val node = ctx.resultAsNodes()[0] as BaseNode
                                                 val nodeid = node.id()
@@ -149,20 +191,23 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                                 ctx.continueTask()
                                             }
                                     )
-                                    .then(retrieveNgramMainNode())
+
+                                    .then(retrieveNgramMainNode()) // then retrieve all ngram
                                     .traverse(NGRAM_INDEX)
                                     .setAsVar("ngram")
+
                                     .inject(addedContents.toLongArray())
-                                    .map(
+                                    .map(// for each tc
                                             newTask()
                                                     .setAsVar("toAdd")
                                                     .readVar("ngram")
-                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toAdd}}")
+                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toAdd}}") //retrieve all their corresponding ngram inverted index
                                     )
-                                    .flat()
+                                    .flat() //flatten
+
                                     .thenDo { ctx ->
-                                        val taskresult = ctx.result()
-                                        taskresult.asArray().forEach {
+
+                                        ctx.result().asArray().forEach { // for each ngram ii
                                             result ->
                                             val node = result as Node
                                             val nodeId = node.id()
@@ -170,23 +215,23 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                             val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
                                             val ngramId = ngram[0]
 
-                                            ngToII.put(ngramId, nodeId)
-                                            tcToII.put(tc, nodeId)
+                                            ngToII.put(ngramId, nodeId) //add them to the ngram map
+                                            tcToII.put(tc, nodeId) //add them to the tc map
                                         }
                                         ctx.continueTask()
                                     }
 
                     )
-                    .ifThen({ similarContents.isNotEmpty() },
+                    .ifThen({ similarContents.isNotEmpty() }, // If there are tokenize Content to that stay
                             newTask()
                                     .then(retrieveNgramMainNode())
                                     .traverse(NGRAM_INDEX)
-                                    .setAsVar("ngram")
+                                    .setAsVar("ngram") //retrieve all ngram
 
-                                    .lookupAll(addedContents.joinToString(prefix = "[", separator = ",", postfix = "]"))
+                                    .lookupAll(addedContents.joinToString(prefix = "[", separator = ",", postfix = "]")) //retrieve all tokenize content
                                     .declareVar("tcToUpdate")
                                     .declareVar("tcIdToUpdate")
-                                    .forEach(
+                                    .forEach(// for each of them if their magic number changes then add it to the tctoUpdate variable
                                             thenDo { ctx ->
                                                 val node = ctx.resultAsNodes()[0] as BaseNode
                                                 val nodeid = node.id()
@@ -207,23 +252,10 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                             }
                                     )
 
-                                    .readVar("tcIdToUpdate")
-                                    .map(
-                                            newTask()
-                                                    .setAsVar("toUpdate")
-                                                    .readVar("ngram")
-                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toUpdate}}")
-                                    )
-                                    .flat()
-                                    .map(
-                                            thenDo { ctx ->
-                                                ctx.continueWith(ctx.wrap(ctx.resultAsNodes()[0].id()))
-                                            })
-                                    .setAsVar("alreadyExistingNgramII")
+                                    .then(updateNgramTokenizedContentFromVar("tcToUpdate")) //then update the ngram
 
-                                    .then(updateNgramTokenizedContentFromVar("tcToUpdate"))
                                     .readVar("tcToUpdate")
-                                    .forEach(
+                                    .forEach(//then update the magic number map
                                             thenDo { ctx ->
                                                 val node = ctx.resultAsNodes()[0] as BaseNode
                                                 val nodeId = node.id()
@@ -246,13 +278,22 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                     .readVar("tcIdToUpdate")
                                     .map(
                                             newTask()
-                                                    .setAsVar("toUpdate")
+                                                    .setAsVar("toUpdate")// for each tc in this situation retrieve the current list of their ngram
+                                                    .thenDo { ctx ->
+                                                        val idTC = ctx.result()[0] as Long
+                                                        tcToII[idTC].forEach { ngramId ->
+                                                            ctx.addToVariable("alreadyExistingNgramII", ngramId)
+                                                        }
+                                                        ctx.continueTask()
+                                                    }
                                                     .readVar("ngram")
-                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toUpdate}}")
+                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toUpdate}}") //then retrieve the new list of their ngram
                                     )
-                                    .flat()
+                                    .flat() //flatten
 
-                                    .forEach(
+                                    .declareVar("alreadyExistingNgramII")
+
+                                    .forEach(// for each ngram if it was not present before put it in the alreadyExistingNgramII var
                                             newTask()
                                                     .thenDo { ctx ->
                                                         val node = ctx.resultAsNodes()[0]
@@ -265,7 +306,7 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                                         ctx.continueTask()
                                                     }
                                     )
-                                    .readVar("listOfNewNgramII")
+                                    .readVar("listOfNewNgramII") // from this list
                                     .thenDo { ctx ->
                                         val taskresult = ctx.result()
                                         taskresult.asArray().forEach {
@@ -276,16 +317,15 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                             val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
                                             val ngramId = ngram[0]
 
-                                            ngToII.put(ngramId, nodeId)
-                                            tcToII.put(tc, nodeId)
+                                            ngToII.put(ngramId, nodeId) // add the nex ngram ii to ngram map
+                                            tcToII.put(tc, nodeId) //add the new ngram ii to the tc map
                                         }
                                         ctx.continueTask()
                                     }
                     )
                     .execute(graph(), {
                         done.on(true)
-                    }
-                    )
+                    })
         })
     }
 

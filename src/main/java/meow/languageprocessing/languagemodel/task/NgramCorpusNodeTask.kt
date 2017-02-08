@@ -38,8 +38,10 @@ object NgramCorpusNodeTask {
 
                 .thenDo { ctx ->
                     val node = ctx.resultAsNodes()[0] as NgramCorpusNode
-                    node.learn()
-                    ctx.continueTask()
+                    node.learn(Callback {
+                        ctx.continueTask()
+                    }
+                    )
                 }
     }
 
