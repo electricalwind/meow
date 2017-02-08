@@ -32,18 +32,20 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
 
     fun predict(doubleArray: LongArray, result: Callback<DoubleArray>) {
         val ngToII = getNgramToNgramInvertedIndex()
-        val resultArray :DoubleArray = DoubleArray(doubleArray.size,{0.0})
+        val resultArray: DoubleArray = DoubleArray(doubleArray.size, { 0.0 })
 
-        if(ngToII.size() !=0){
+        if (ngToII.size() != 0) {
+            val waiter: DeferCounter = graph().newCounter(doubleArray.size)
 
-            for(i in 0..doubleArray.size-1){
+            for (i in 0..doubleArray.size - 1) {
+
                 val ngramId = doubleArray[i]
                 val arrayOfTCContainingNgram = ngToII[ngramId]
-                if(arrayOfTCContainingNgram.isNotEmpty()){
-                    val counter = IntArray(arrayOfTCContainingNgram.size,{0})
-                    val waiter : DeferCounter = graph().newCounter(1)
+
+                if (arrayOfTCContainingNgram.isNotEmpty()) {
+                    val counter = IntArray(arrayOfTCContainingNgram.size, { 0 })
                     newTask()
-                            .lookupAll(arrayOfTCContainingNgram.joinToString(prefix = "[",separator = ",",postfix = "]"))
+                            .lookupAll(arrayOfTCContainingNgram.joinToString(prefix = "[", separator = ",", postfix = "]"))
                             .forEach(
                                     thenDo { ctx ->
                                         val ngramII = ctx.resultAsNodes()[0]
@@ -53,21 +55,24 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                         ctx.continueTask()
                                     }
                             )
-                            .execute(graph(),{waiter.count()})
-                    waiter.then {
-                        resultArray[i] = counter.sum().toDouble()
-                    }
+                            .execute(graph(), {
+                                taskresult ->
+                                resultArray[i] = counter.sum().toDouble()
+                                waiter.count()
+                            })
+                } else {
+                    waiter.count()
                 }
             }
-            result.on(resultArray)
-        }
-        else{
+            waiter.then { result.on(resultArray) }
+
+        } else {
             throw RuntimeException("Trying to predic on a empty ngramCorpus")
         }
 
     }
 
-    fun learn() {
+    fun learn(done: Callback<Boolean>) {
         super.relation(NGRAM_CORPUS_NODE_CORPUS, Callback { father ->
             if (father.size != 1) throw RuntimeException("No corpus declared for this NgramCorpus Node")
 
@@ -87,213 +92,200 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
             val removedContents = tcCurrent.minus(tcCorpus)
             val similarContents = tcCorpus.intersect(tcCurrent)
 
-            var waiter: DeferCounter
-            if(removedContents.isNotEmpty()) {
-                waiter = graph().newCounter(1)
-                newTask()
-                        .lookupAll(removedContents.joinToString(prefix = "[", separator = ",", postfix = "]"))
-                        .then(retrieveNgramMainNode())
-                        .traverse(NGRAM_INDEX)
-                        .setAsVar("ngram")
-                        .inject(removedContents.toLongArray())
-                        .map(
-                                newTask()
-                                        .setAsVar("toRemove")
-                                        .readVar("ngram")
-                                        .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toRemove}}")
-                        )
-                        .flat()
-                        .execute(graph(), {
-                            taskresult ->
-                            taskresult.asArray().forEach {
-                                result ->
-                                val node = result as Node
-                                val nodeId = node.id()
-                                val tc = node.get(II_TC) as Long
-                                val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
-                                val ngramId = ngram[0]
-
-                                ngToII.delete(ngramId, nodeId)
-                                tcToII.delete(tc, nodeId)
-                            }
-                            waiter.count()
-
-                        })
-                waiter.then({})
-
-                removedContents.forEach { tc ->
-                    val values = tcMN.get(tc)
-                    values.forEach { value ->
-                        tcMN.delete(tc, value)
-                    }
-                }
-            }
-
-            if(addedContents.isNotEmpty()) {
-                waiter = graph().newCounter(1)
-                newTask()
-                        .lookupAll(addedContents.joinToString(prefix = "[", separator = ",", postfix = "]"))
-                        .setAsVar("tc")
-                        .then(updateNgramTokenizedContentFromVar("tc"))
-                        .readVar("tc")
-                        .forEach(
-                                thenDo { ctx ->
-                                    val node = ctx.resultAsNodes()[0] as BaseNode
-                                    val nodeid = node.id()
-                                    val supertime = node._index_superTimeTree
-                                    val time = node._index_timeTree
-
-                                    val magicTime = (this.graph().space().get(time) as TimeTreeChunk).magic()
-                                    val magicsuperTime = (this.graph().space().get(supertime) as TimeTreeChunk).magic()
-
-                                    tcMN.put(nodeid, magicTime)
-                                    tcMN.put(nodeid, magicsuperTime)
-                                    ctx.continueTask()
-                                }
-                        )
-                        .then(retrieveNgramMainNode())
-                        .traverse(NGRAM_INDEX)
-                        .setAsVar("ngram")
-                        .inject(addedContents.toLongArray())
-                        .map(
-                                newTask()
-                                        .setAsVar("toAdd")
-                                        .readVar("ngram")
-                                        .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toAdd}}")
-                        )
-                        .flat()
-                        .execute(graph(), {
-                            taskresult ->
-                            taskresult.asArray().forEach {
-                                result ->
-                                val node = result as Node
-                                val nodeId = node.id()
-                                val tc = node.get(II_TC) as Long
-                                val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
-                                val ngramId = ngram[0]
-
-                                ngToII.put(ngramId, nodeId)
-                                tcToII.put(tc, nodeId)
-                            }
-                            waiter.count()
-
-                        })
-                waiter.then({
-                })
-            }
-
-            if(similarContents.isNotEmpty()){
-                waiter = graph().newCounter(1)
-                newTask()
-
-                        .then(retrieveNgramMainNode())
-                        .traverse(NGRAM_INDEX)
-                        .setAsVar("ngram")
-
-                        .lookupAll(addedContents.joinToString(prefix = "[", separator = ",", postfix = "]"))
-                        .declareVar("tcToUpdate")
-                        .declareVar("tcIdToUpdate")
-                        .forEach(
-                                thenDo { ctx ->
-                                    val node = ctx.resultAsNodes()[0] as BaseNode
-                                    val nodeid = node.id()
-                                    val supertime = node._index_superTimeTree
-                                    val time = node._index_timeTree
-
-                                    val magicTime = (this.graph().space().get(time) as TimeTreeChunk).magic()
-                                    val magicsuperTime = (this.graph().space().get(supertime) as TimeTreeChunk).magic()
-
-                                    val storedMagicTime = tcMN[nodeid][0]
-                                    val storedSuperMagicTime = tcMN[nodeid][1]
-
-                                    if(magicTime!= storedMagicTime || magicsuperTime!=storedSuperMagicTime){
-                                        ctx.addToVariable("tcToUpdate",node)
-                                        ctx.addToVariable("tcIdToUpdate",nodeid)
-                                    }
-                                    ctx.continueTask()
-                                }
-                        )
-
-                        .readVar("tcIdToUpdate")
-                        .map(
-                                newTask()
-                                        .setAsVar("toUpdate")
-                                        .readVar("ngram")
-                                        .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toUpdate}}")
-                        )
-                        .flat()
-                        .map(
-                                thenDo { ctx ->
-                                    ctx.continueWith(ctx.wrap(ctx.resultAsNodes()[0].id()))
-                                })
-                        .setAsVar("alreadyExistingNgramII")
-
-                        .then(updateNgramTokenizedContentFromVar("tcToUpdate"))
-                        .readVar("tcToUpdate")
-                        .forEach(
-                                thenDo { ctx ->
-                                    val node = ctx.resultAsNodes()[0] as BaseNode
-                                    val nodeId = node.id()
-                                    val supertime = node._index_superTimeTree
-                                    val time = node._index_timeTree
-
-                                    val magicTime = (this.graph().space().get(time) as TimeTreeChunk).magic()
-                                    val magicsuperTime = (this.graph().space().get(supertime) as TimeTreeChunk).magic()
-
-                                    tcMN.delete(nodeId,tcMN[nodeId][0])
-                                    tcMN.delete(nodeId,tcMN[nodeId][1])
-                                    tcMN.put(node.id(), magicTime)
-                                    tcMN.put(node.id(), magicsuperTime)
-                                    ctx.continueTask()
-                                }
-                        )
-
-                        .declareVar("listOfNewNgramII")
-
-                        .readVar("tcIdToUpdate")
-                        .map(
-                                newTask()
-                                        .setAsVar("toUpdate")
-                                        .readVar("ngram")
-                                        .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toUpdate}}")
-                        )
-                        .flat()
-
-                        .forEach(
-                                newTask()
-                                        .thenDo { ctx ->
-                                            val node = ctx.resultAsNodes()[0]
+            newTask()
+                    .ifThen({ removedContents.isNotEmpty() },
+                            newTask().lookupAll(removedContents.joinToString(prefix = "[", separator = ",", postfix = "]"))
+                                    .then(retrieveNgramMainNode())
+                                    .traverse(NGRAM_INDEX)
+                                    .setAsVar("ngram")
+                                    .inject(removedContents.toLongArray())
+                                    .map(
+                                            newTask()
+                                                    .setAsVar("toRemove")
+                                                    .readVar("ngram")
+                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toRemove}}")
+                                    )
+                                    .flat()
+                                    .thenDo { ctx ->
+                                        val taskresult = ctx.result()
+                                        taskresult.asArray().forEach {
+                                            result ->
+                                            val node = result as Node
                                             val nodeId = node.id()
-                                            val listOfAlreadyExisting = ctx.variable("alreadyExistingNgramII").asArray().map {id -> id as Long }
+                                            val tc = node.get(II_TC) as Long
+                                            val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
+                                            val ngramId = ngram[0]
 
-                                            if(!listOfAlreadyExisting.contains(nodeId)){
-                                                ctx.addToVariable("listOfNewNgramII",node)
-                                            }
-                                            ctx.continueTask()
+                                            ngToII.delete(ngramId, nodeId)
+                                            tcToII.delete(tc, nodeId)
                                         }
-                        )
-                        .readVar("listOfNewNgramII")
-                        .execute(graph(),{
-                            taskresult ->
-                            taskresult.asArray().forEach {
-                                result ->
-                                val node = result as Node
-                                val nodeId = node.id()
-                                val tc = node.get(II_TC) as Long
-                                val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
-                                val ngramId = ngram[0]
+                                        removedContents.forEach { tc ->
+                                            val values = tcMN.get(tc)
+                                            values.forEach { value ->
+                                                tcMN.delete(tc, value)
+                                            }
+                                        }
+                                        ctx.continueTask()
+                                    }
+                    )
+                    .ifThen({ addedContents.isNotEmpty() },
+                            newTask()
+                                    .lookupAll(addedContents.joinToString(prefix = "[", separator = ",", postfix = "]"))
+                                    .setAsVar("tc")
+                                    .then(updateNgramTokenizedContentFromVar("tc"))
+                                    .readVar("tc")
+                                    .forEach(
+                                            thenDo { ctx ->
+                                                val node = ctx.resultAsNodes()[0] as BaseNode
+                                                val nodeid = node.id()
+                                                val supertime = node._index_superTimeTree
+                                                val time = node._index_timeTree
 
-                                ngToII.put(ngramId, nodeId)
-                                tcToII.put(tc, nodeId)
-                            }
-                            waiter.count()
-                        }
-                        )
-                waiter.then {
+                                                val magicTime = (this.graph().space().get(time) as TimeTreeChunk).magic()
+                                                val magicsuperTime = (this.graph().space().get(supertime) as TimeTreeChunk).magic()
 
-                }
+                                                tcMN.put(nodeid, magicTime)
+                                                tcMN.put(nodeid, magicsuperTime)
+                                                ctx.continueTask()
+                                            }
+                                    )
+                                    .then(retrieveNgramMainNode())
+                                    .traverse(NGRAM_INDEX)
+                                    .setAsVar("ngram")
+                                    .inject(addedContents.toLongArray())
+                                    .map(
+                                            newTask()
+                                                    .setAsVar("toAdd")
+                                                    .readVar("ngram")
+                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toAdd}}")
+                                    )
+                                    .flat()
+                                    .thenDo { ctx ->
+                                        val taskresult = ctx.result()
+                                        taskresult.asArray().forEach {
+                                            result ->
+                                            val node = result as Node
+                                            val nodeId = node.id()
+                                            val tc = node.get(II_TC) as Long
+                                            val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
+                                            val ngramId = ngram[0]
 
-            }
+                                            ngToII.put(ngramId, nodeId)
+                                            tcToII.put(tc, nodeId)
+                                        }
+                                        ctx.continueTask()
+                                    }
+
+                    )
+                    .ifThen({ similarContents.isNotEmpty() },
+                            newTask()
+                                    .then(retrieveNgramMainNode())
+                                    .traverse(NGRAM_INDEX)
+                                    .setAsVar("ngram")
+
+                                    .lookupAll(addedContents.joinToString(prefix = "[", separator = ",", postfix = "]"))
+                                    .declareVar("tcToUpdate")
+                                    .declareVar("tcIdToUpdate")
+                                    .forEach(
+                                            thenDo { ctx ->
+                                                val node = ctx.resultAsNodes()[0] as BaseNode
+                                                val nodeid = node.id()
+                                                val supertime = node._index_superTimeTree
+                                                val time = node._index_timeTree
+
+                                                val magicTime = (this.graph().space().get(time) as TimeTreeChunk).magic()
+                                                val magicsuperTime = (this.graph().space().get(supertime) as TimeTreeChunk).magic()
+
+                                                val storedMagicTime = tcMN[nodeid][0]
+                                                val storedSuperMagicTime = tcMN[nodeid][1]
+
+                                                if (magicTime != storedMagicTime || magicsuperTime != storedSuperMagicTime) {
+                                                    ctx.addToVariable("tcToUpdate", node)
+                                                    ctx.addToVariable("tcIdToUpdate", nodeid)
+                                                }
+                                                ctx.continueTask()
+                                            }
+                                    )
+
+                                    .readVar("tcIdToUpdate")
+                                    .map(
+                                            newTask()
+                                                    .setAsVar("toUpdate")
+                                                    .readVar("ngram")
+                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toUpdate}}")
+                                    )
+                                    .flat()
+                                    .map(
+                                            thenDo { ctx ->
+                                                ctx.continueWith(ctx.wrap(ctx.resultAsNodes()[0].id()))
+                                            })
+                                    .setAsVar("alreadyExistingNgramII")
+
+                                    .then(updateNgramTokenizedContentFromVar("tcToUpdate"))
+                                    .readVar("tcToUpdate")
+                                    .forEach(
+                                            thenDo { ctx ->
+                                                val node = ctx.resultAsNodes()[0] as BaseNode
+                                                val nodeId = node.id()
+                                                val supertime = node._index_superTimeTree
+                                                val time = node._index_timeTree
+
+                                                val magicTime = (this.graph().space().get(time) as TimeTreeChunk).magic()
+                                                val magicsuperTime = (this.graph().space().get(supertime) as TimeTreeChunk).magic()
+
+                                                tcMN.delete(nodeId, tcMN[nodeId][0])
+                                                tcMN.delete(nodeId, tcMN[nodeId][1])
+                                                tcMN.put(node.id(), magicTime)
+                                                tcMN.put(node.id(), magicsuperTime)
+                                                ctx.continueTask()
+                                            }
+                                    )
+
+                                    .declareVar("listOfNewNgramII")
+
+                                    .readVar("tcIdToUpdate")
+                                    .map(
+                                            newTask()
+                                                    .setAsVar("toUpdate")
+                                                    .readVar("ngram")
+                                                    .traverse(NGRAM_INVERTED_INDEX_RELATION, II_TC, "{{toUpdate}}")
+                                    )
+                                    .flat()
+
+                                    .forEach(
+                                            newTask()
+                                                    .thenDo { ctx ->
+                                                        val node = ctx.resultAsNodes()[0]
+                                                        val nodeId = node.id()
+                                                        val listOfAlreadyExisting = ctx.variable("alreadyExistingNgramII").asArray().map { id -> id as Long }
+
+                                                        if (!listOfAlreadyExisting.contains(nodeId)) {
+                                                            ctx.addToVariable("listOfNewNgramII", node)
+                                                        }
+                                                        ctx.continueTask()
+                                                    }
+                                    )
+                                    .readVar("listOfNewNgramII")
+                                    .thenDo { ctx ->
+                                        val taskresult = ctx.result()
+                                        taskresult.asArray().forEach {
+                                            result ->
+                                            val node = result as Node
+                                            val nodeId = node.id()
+                                            val tc = node.get(II_TC) as Long
+                                            val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
+                                            val ngramId = ngram[0]
+
+                                            ngToII.put(ngramId, nodeId)
+                                            tcToII.put(tc, nodeId)
+                                        }
+                                        ctx.continueTask()
+                                    }
+                    )
+                    .execute(graph(), {
+                        done.on(true)
+                    }
+                    )
         })
     }
 
