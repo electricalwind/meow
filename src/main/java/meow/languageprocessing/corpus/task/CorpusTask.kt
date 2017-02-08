@@ -70,7 +70,6 @@ object CorpusTask {
                                 .createNode()
                                 .setAttribute(CORPUS_NAME, Type.STRING, corpusName)
                                 .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_CORPUS)
-                                .setAttribute(CORPUS_VERSION,Type.INT,"0")
                                 .timeSensitivity("-1", "0")
                                 .defineAsVar("corpusNode")
                                 .then(CorpusActions.retrieveCorpusMainNode())
@@ -86,12 +85,6 @@ object CorpusTask {
         return newTask()
                 .then(CorpusActions.getOrCreateCorpus(corpusName))
                 .defineAsVar("corpus")
-                .thenDo { ctx ->
-                    val corpus = ctx.resultAsNodes()[0]
-                    val previous = corpus.get(CORPUS_VERSION) as Int
-                    corpus.set(CORPUS_VERSION,Type.INT,previous+1)
-                    ctx.continueTask()
-                }
                 .pipe(checkNodesType(tokenizeContentVar, NODE_TYPE_TOKENIZE_CONTENT))
                 .readVar(tokenizeContentVar)
                 .forEach(
@@ -121,12 +114,6 @@ object CorpusTask {
         return newTask()
                 .then(CorpusActions.getOrCreateCorpus(corpusName))
                 .defineAsVar("corpus")
-                .thenDo { ctx ->
-                    val corpus = ctx.resultAsNodes()[0]
-                    val previous = corpus.get(CORPUS_VERSION) as Int
-                    corpus.set(CORPUS_VERSION,Type.INT,previous+1)
-                    ctx.continueTask()
-                }
                 .pipe(checkNodesType(tokenizeContentVar, NODE_TYPE_TOKENIZE_CONTENT))
                 .readVar(tokenizeContentVar)
                 .forEach(
@@ -139,7 +126,7 @@ object CorpusTask {
                                 }
                                 .readVar("corpus")
                                 .thenDo { ctx ->
-                                    val relation = ctx.resultAsNodes()[0].getOrCreate(CORPUS_TO_TOKENIZEDCONTENTS_RELATION,Type.RELATION) as Relation
+                                    val relation = ctx.resultAsNodes()[0].getOrCreate(CORPUS_TO_TOKENIZEDCONTENTS_RELATION, Type.RELATION) as Relation
                                     val id = ctx.variable("id")[0] as Long
                                     if (relation.size() != 0 && relation.all().contains(id))
                                         relation.remove(id)

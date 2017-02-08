@@ -21,6 +21,7 @@ import greycat.Tasks.newTask
 import meow.languageprocessing.corpus.CorpusConstants.*
 import meow.languageprocessing.corpus.actions.CorpusActions.getOrCreateCorpus
 import meow.languageprocessing.languagemodel.LanguageModelConstants.*
+import meow.languageprocessing.languagemodel.nodes.NgramCorpusNode
 import mylittleplugin.MyLittleActions.*
 
 
@@ -34,6 +35,17 @@ object NgramCorpusNodeTask {
                 .then(ifEmptyThen(
                         createNgramCorpus()
                 ))
+
+                .thenDo { ctx ->
+                    val node = ctx.resultAsNodes()[0] as NgramCorpusNode
+                    node.learn()
+                    ctx.continueTask()
+                }
+    }
+
+    fun countNgramOccurenceInCorpus(ngramCorpusVar: String, nGramToCount: String): Task {
+        //todo
+        return newTask()
     }
 
     private fun createNgramCorpus(): Task {
@@ -44,10 +56,10 @@ object NgramCorpusNodeTask {
                                         .createTypedNode(NGRAM_CORPUS_NODE_TYPE)
                                         .setAsVar("ngramCorpus")
                                         .setAttribute(CORPUS_PLUGIN_INDEX, Type.STRING, NGRAM_CORPUS_NODE_TYPE)
-                                        .timeSensitivity("-1","0")
-                                        .addVarToRelation(NGRAM_CORPUS_NODE_CORPUS,"corpus")
+                                        .timeSensitivity("-1", "0")
+                                        .addVarToRelation(NGRAM_CORPUS_NODE_CORPUS, "corpus")
                                         .readVar("corpus")
-                                        .addVarToRelation(CORPUS_PLUGIN,"ngramCorpus",CORPUS_PLUGIN_INDEX)
+                                        .addVarToRelation(CORPUS_PLUGIN, "ngramCorpus", CORPUS_PLUGIN_INDEX)
                                         .readVar("ngramCorpus")
                         )
                 )

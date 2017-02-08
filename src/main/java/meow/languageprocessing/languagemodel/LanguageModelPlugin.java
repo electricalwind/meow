@@ -15,5 +15,29 @@
  */
 package meow.languageprocessing.languagemodel;
 
-public class LanguageModelPlugin {
+import greycat.Graph;
+import greycat.Node;
+import greycat.plugin.NodeFactory;
+import greycat.plugin.Plugin;
+import meow.languageprocessing.languagemodel.nodes.NgramCorpusNode;
+
+import static meow.languageprocessing.languagemodel.LanguageModelConstants.NGRAM_CORPUS_NODE_TYPE;
+
+public class LanguageModelPlugin implements Plugin {
+    @Override
+    public void start(Graph graph) {
+        graph.nodeRegistry()
+                .declaration(NGRAM_CORPUS_NODE_TYPE)
+                .setFactory(new NodeFactory() {
+                    @Override
+                    public Node create(long world, long time, long id, Graph graph) {
+                        return new NgramCorpusNode(world, time, id, graph);
+                    }
+                });
+    }
+
+    @Override
+    public void stop() {
+
+    }
 }

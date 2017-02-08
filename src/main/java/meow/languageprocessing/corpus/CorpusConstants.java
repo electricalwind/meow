@@ -22,8 +22,6 @@ public class CorpusConstants {
 
     public final static String CORPUS_TO_TOKENIZEDCONTENTS_RELATION = "tokenizedContents";
 
-    public final static String CORPUS_VERSION = "v";
-
     public final static String NODE_TYPE_CORPUS = "corpus";
 
     public final static String CORPUS_PLUGIN = "plugin";
