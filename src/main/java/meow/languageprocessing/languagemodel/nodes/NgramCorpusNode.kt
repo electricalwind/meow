@@ -35,13 +35,14 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
         val resultArray: IntArray = IntArray(ngramIds.size, { 0 })
 
         if (ngToII.size() != 0) {
-            val arrayOfResult = Array<MutableList<Int>>(ngramIds.size,{ mutableListOf()})
-
+            newTask()
+                    .travelInWorld("${world()}")
+                    .travelInTime("${time()}")
             loopPar("0", "${ngramIds.size - 1}",
 
                     thenDo { ctx ->
                         val i = ctx.variable("i") as Int
-                        ctx.setVariable("iter",i)
+                        ctx.setVariable("iter", i)
                         val ngramId = ngramIds[i]
                         val iingram = ngToII[ngramId]
                         if (iingram.isNotEmpty()) {
@@ -53,51 +54,52 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                     }.ifThen({ ctx -> ctx.result()[0] as Boolean },
                             newTask()
                                     .lookupAll("{{iingrams}}")
-                                    .forEach(
+                                    .map(
                                             thenDo { ctx ->
-                                                val i =ctx.variable("iter")[0] as Int
+
                                                 val ngramII = ctx.resultAsNodes()[0]
                                                 val pos = ngramII.get("position") as IntArray
-                                                arrayOfResult[i].add(pos.size)
-                                                ctx.continueTask()
+                                                ctx.continueWith(ctx.wrap(pos.size))
                                             }
                                     )
+                                    .thenDo { ctx ->
+                                        val i = ctx.variable("iter")[0] as Int
+                                        resultArray[i] = ctx.result().asArray().map { pos -> pos as Int }.sum()
+                                        ctx.continueTask()
+                                    }
                     )
             ).execute(graph(),
                     {
                         taskresult ->
-                        for(i in 0..ngramIds.size-1){
-                            resultArray[i] =arrayOfResult[i].sum()
-                        }
                         result.on(resultArray)
                     }
-                    )
+            )
             /**for (i in 0..doubleArray.size - 1) {
 
-                val ngramId = doubleArray[i]
-                val arrayOfTCContainingNgram = ngToII[ngramId]
+            val ngramId = doubleArray[i]
+            val arrayOfTCContainingNgram = ngToII[ngramId]
 
-                if (arrayOfTCContainingNgram.isNotEmpty()) {
-                    val counter = IntArray(arrayOfTCContainingNgram.size, { 0 })
-                    newTask()
-                            .lookupAll(arrayOfTCContainingNgram.joinToString(prefix = "[", separator = ",", postfix = "]"))
-                            .forEach(
-                                    thenDo { ctx ->
-                                        val ngramII = ctx.resultAsNodes()[0]
-                                        val index = ctx.variable("i")[0] as Int
-                                        val pos = ngramII.get("position") as IntArray
-                                        counter[index] = pos.size
-                                        ctx.continueTask()
-                                    }
-                            )
-                            .execute(graph(), {
-                                taskresult ->
-                                resultArray[i] = counter.sum().toDouble()
-                                waiter.count()
-                            })
-                } else {
-                    waiter.count()
-                }
+            if (arrayOfTCContainingNgram.isNotEmpty()) {
+            val counter = IntArray(arrayOfTCContainingNgram.size, { 0 })
+            newTask()
+            .lookupAll(arrayOfTCContainingNgram.joinToString(prefix = "[", separator = ",", postfix = "]"))
+            .forEach(
+            thenDo { ctx ->
+            val ngramII = ctx.resultAsNodes()[0]
+            val index = ctx.variable("i")[0] as Int
+            val pos = ngramII.get("position") as IntArray
+            counter[index] = pos.size
+            ctx.continueTask()
+            }
+            )
+            .execute(graph(), {
+            taskresult ->
+            resultArray[i] = counter.sum().toDouble()
+            waiter.count()
+            })
+            } else {
+            waiter.count()
+            }
             }
             waiter.then { result.on(resultArray) }*/
 
@@ -342,6 +344,47 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
 
     private fun getTCMagicNumbers(): LongLongArrayMap {
         return getOrCreate("tcMN", Type.LONG_TO_LONG_ARRAY_MAP) as LongLongArrayMap
+    }
+
+
+    fun allTimeNgram(): LongArray {
+        val ngToII = getNgramToNgramInvertedIndex() //ngram to InvertedIndex
+
+        val nbNgram = ngToII.size()
+
+        val ngramId = LongArray(nbNgram, { 0 })
+
+        var i = 0
+        getNgramToNgramInvertedIndex().each { key, value ->
+            ngramId[i] = key
+            i++
+        }
+        return ngramId
+    }
+
+    fun allTimeVocabulary(result: Callback<LongArray>) {
+        newTask()
+                .lookupAll(allTimeNgram().joinToString(prefix = "[", separator = ",", postfix = "]"))
+                .selectScript("node.get('order') == 1")
+                .execute(graph(), {
+                    taskresult ->
+                    result.on(taskresult.asArray().map { node -> node as Node }.map(Node::id).toLongArray())
+                })
+
+    }
+
+    fun mapOfCount(result: Callback<Map<Long,Int>>) {
+        val ngrams = allTimeNgram()
+        val mapCount = mutableMapOf<Long,Int>()
+        predict(ngrams,Callback{
+            count ->
+            var i = 0
+            count.forEach {
+                mapCount.put(ngrams[i],count[i])
+                i++
+            }
+            result.on(mapCount)
+        })
     }
 
 }
