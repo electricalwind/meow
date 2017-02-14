@@ -1,12 +1,12 @@
 # Meow: A language Processing plugin for GreyCat
 
 
-![GreyCat-version](https://img.shields.io/badge/GreyCat--version-12--SNAPSHOT-green.svg)
+![GreyCat-version](https://img.shields.io/badge/GreyCat--version-1--SNAPSHOT-green.svg)
 
 ![version](https://img.shields.io/badge/version-1.0-blue.svg)
 
 This library bring additional functionality to the [GreyCat](https://github.com/datathings/greycat) project. 
-This library is compatible with the latest Greycat api, that will be introduced in the 12th version. 
+This library is compatible with the latest Greycat api, that will be introduced in the 1st version. 
 Compatibility with previous versions of Greycat(formerly MWDB) api is not supported.
 
 
