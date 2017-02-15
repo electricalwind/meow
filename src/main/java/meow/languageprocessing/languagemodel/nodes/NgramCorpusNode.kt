@@ -123,6 +123,7 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
             val tcToII = getTCToNgramInvertedIndex() //tokenizedContent to InvertedIndex
             val ngToII = getNgramToNgramInvertedIndex() //ngram to InvertedIndex
             val tcMN = getTCMagicNumbers() //tokenized Content to Magic Numbers
+            val ngramOrder = getOrderToNgram() //Order To Ngram
 
 
             val tcCurrent = keyOfLongToLongArrayMap(tcToII).toList() //current tokenize Content known by the node
@@ -169,6 +170,20 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                                 tcMN.delete(tc, value) //delete them
                                             }
                                         }
+                                        ctx.continueTask()
+                                    }
+                                    .traverse(INVERTED_NGRAM_INDEX_RELATION)
+                                    //. would need a deduplicate TODO
+                                    .thenDo {
+                                        ctx ->
+                                        ctx.result().asArray()
+                                                .forEach { // for all ngram remove
+                                                    result ->
+                                                    val node = result as Node
+                                                    val nodeId = node.id()
+                                                    val order = node.get("order") as Int
+                                                    ngramOrder.delete(order.toLong(),nodeId)
+                                                }
                                         ctx.continueTask()
                                     }
                     )
@@ -344,6 +359,10 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
 
     private fun getTCMagicNumbers(): LongLongArrayMap {
         return getOrCreate("tcMN", Type.LONG_TO_LONG_ARRAY_MAP) as LongLongArrayMap
+    }
+
+    private fun getOrderToNgram():LongLongArrayMap{
+        return getOrCreate("orderToNgram", Type.LONG_TO_LONG_ARRAY_MAP) as LongLongArrayMap
     }
 
 

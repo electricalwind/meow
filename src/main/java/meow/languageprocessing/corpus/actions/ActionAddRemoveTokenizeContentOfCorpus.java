@@ -18,6 +18,7 @@ package meow.languageprocessing.corpus.actions;
 import greycat.*;
 import greycat.internal.task.TaskHelper;
 import greycat.plugin.SchedulerAffinity;
+import greycat.struct.Buffer;
 import meow.languageprocessing.corpus.task.CorpusTask;
 
 import static meow.languageprocessing.corpus.actions.CorpusActionNames.ADD_REMOVE_TOKENIZE_CONTENTS_OF_CORPUS;
@@ -28,7 +29,7 @@ public class ActionAddRemoveTokenizeContentOfCorpus implements Action {
     private final String _tokenizeContentVar;
     private final String _corpusName;
 
-    public ActionAddRemoveTokenizeContentOfCorpus(boolean p_add, String p_tokenizeContentVar, String p_corpusName){
+    public ActionAddRemoveTokenizeContentOfCorpus(boolean p_add, String p_tokenizeContentVar, String p_corpusName) {
         this._add = p_add;
         this._tokenizeContentVar = p_tokenizeContentVar;
         this._corpusName = p_corpusName;
@@ -38,11 +39,10 @@ public class ActionAddRemoveTokenizeContentOfCorpus implements Action {
     @Override
     public void eval(TaskContext ctx) {
         final Task task;
-        if(_add){
-           task = CorpusTask.addTokenizeContentToCorpus(_tokenizeContentVar,_corpusName);
-        }
-        else{
-            task = CorpusTask.removeTokenizeContentFromCorpus(_tokenizeContentVar,_corpusName);
+        if (_add) {
+            task = CorpusTask.addTokenizeContentToCorpus(_tokenizeContentVar, _corpusName);
+        } else {
+            task = CorpusTask.removeTokenizeContentFromCorpus(_tokenizeContentVar, _corpusName);
         }
         task.executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD,
                 new Callback<TaskResult>() {
@@ -65,21 +65,14 @@ public class ActionAddRemoveTokenizeContentOfCorpus implements Action {
                 });
     }
 
-    public void serialize(StringBuilder builder) {
-        builder.append(ADD_REMOVE_TOKENIZE_CONTENTS_OF_CORPUS);
-        builder.append(Constants.TASK_PARAM_OPEN);
-        builder.append(_add);
-        builder.append(Constants.TASK_PARAM_SEP);
+    public void serialize(Buffer builder) {
+        builder.writeString(ADD_REMOVE_TOKENIZE_CONTENTS_OF_CORPUS);
+        builder.writeChar(Constants.TASK_PARAM_OPEN);
+        builder.writeString(Boolean.toString(_add));
+        builder.writeChar(Constants.TASK_PARAM_SEP);
         TaskHelper.serializeString(_tokenizeContentVar, builder, true);
-        builder.append(Constants.TASK_PARAM_SEP);
+        builder.writeChar(Constants.TASK_PARAM_SEP);
         TaskHelper.serializeString(_corpusName, builder, true);
-        builder.append(Constants.TASK_PARAM_CLOSE);
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder res = new StringBuilder();
-        serialize(res);
-        return res.toString();
+        builder.writeChar(Constants.TASK_PARAM_CLOSE);
     }
 }

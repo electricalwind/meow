@@ -17,6 +17,7 @@ package meow.languageprocessing.ngram.actions;
 
 import greycat.*;
 import greycat.plugin.SchedulerAffinity;
+import greycat.struct.Buffer;
 import meow.languageprocessing.ngram.exception.UninitializeNgramMainNodeException;
 import meow.languageprocessing.ngram.task.NgramTask;
 
@@ -44,18 +45,11 @@ public class ActionRetrieveNgramMainNode implements Action {
                         });
     }
 
-    public void serialize(StringBuilder builder) {
-        builder.append(NgramActionNames.RETRIEVE_NGRAM_MAIN_NODE);
-        builder.append(Constants.TASK_PARAM_OPEN);
-        builder.append(Constants.TASK_PARAM_CLOSE);
+    public void serialize(Buffer builder) {
+        builder.writeString(NgramActionNames.RETRIEVE_NGRAM_MAIN_NODE);
+        builder.writeChar(Constants.TASK_PARAM_OPEN);
+        builder.writeChar(Constants.TASK_PARAM_CLOSE);
 
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder res = new StringBuilder();
-        serialize(res);
-        return res.toString();
     }
 
 }

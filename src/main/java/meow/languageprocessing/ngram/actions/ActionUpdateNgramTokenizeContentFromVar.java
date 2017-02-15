@@ -18,6 +18,7 @@ package meow.languageprocessing.ngram.actions;
 import greycat.*;
 import greycat.internal.task.TaskHelper;
 import greycat.plugin.SchedulerAffinity;
+import greycat.struct.Buffer;
 import meow.languageprocessing.ngram.task.RelationTask;
 
 
@@ -54,16 +55,11 @@ public class ActionUpdateNgramTokenizeContentFromVar implements Action {
     }
 
     @Override
-    public void serialize(StringBuilder builder) {
-        builder.append(NgramActionNames.UPDATE_NGRAM_TC_FROM_VAR);
-        builder.append(Constants.TASK_PARAM_OPEN);
+    public void serialize(Buffer builder) {
+        builder.writeString(NgramActionNames.UPDATE_NGRAM_TC_FROM_VAR);
+        builder.writeChar(Constants.TASK_PARAM_OPEN);
         TaskHelper.serializeString(_var,builder,true);
-        builder.append(Constants.TASK_PARAM_CLOSE);
+        builder.writeChar(Constants.TASK_PARAM_CLOSE);
     }
-    @Override
-    public String toString() {
-        final StringBuilder res = new StringBuilder();
-        serialize(res);
-        return res.toString();
-    }
+
 }

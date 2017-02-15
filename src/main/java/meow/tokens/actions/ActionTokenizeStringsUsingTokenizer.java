@@ -18,6 +18,7 @@ package meow.tokens.actions;
 import greycat.*;
 import greycat.internal.task.TaskHelper;
 import greycat.plugin.SchedulerAffinity;
+import greycat.struct.Buffer;
 import meow.tokens.task.TokenizationTask;
 
 public class ActionTokenizeStringsUsingTokenizer implements Action {
@@ -47,25 +48,19 @@ public class ActionTokenizeStringsUsingTokenizer implements Action {
                         });
     }
 
-    public void serialize(StringBuilder builder) {
-        builder.append(TokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER);
-        builder.append(Constants.TASK_PARAM_OPEN);
+    public void serialize(Buffer builder) {
+        builder.writeString(TokenActionNames.TOKENIZE_STRINGS_USING_TOKENIZER);
+        builder.writeChar(Constants.TASK_PARAM_OPEN);
         TaskHelper.serializeString(_tokenizer, builder, true);
-        builder.append(Constants.TASK_PARAM_SEP);
+        builder.writeChar(Constants.TASK_PARAM_SEP);
         TaskHelper.serializeString(_preprocessor, builder, true);
-        builder.append(Constants.TASK_PARAM_SEP);
-        builder.append(_type);
+        builder.writeChar(Constants.TASK_PARAM_SEP);
+        builder.writeString(_type);
         if (_toTokenize != null && _toTokenize.length > 0) {
-            builder.append(Constants.TASK_PARAM_SEP);
+            builder.writeChar(Constants.TASK_PARAM_SEP);
             TaskHelper.serializeStringParams(_toTokenize, builder);
         }
-        builder.append(Constants.TASK_PARAM_CLOSE);
+        builder.writeChar(Constants.TASK_PARAM_CLOSE);
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder res = new StringBuilder();
-        serialize(res);
-        return res.toString();
-    }
 }

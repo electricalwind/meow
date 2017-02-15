@@ -17,6 +17,7 @@ package meow.tokens.actions;
 
 import greycat.*;
 import greycat.plugin.SchedulerAffinity;
+import greycat.struct.Buffer;
 import meow.tokens.task.VocabularyTask;
 
 public class ActionInitializeVocabulary implements Action {
@@ -43,16 +44,10 @@ public class ActionInitializeVocabulary implements Action {
                         });
     }
 
-    public void serialize(StringBuilder builder) {
-        builder.append(TokenActionNames.INITIALIZE_VOCABULARY);
-        builder.append(Constants.TASK_PARAM_OPEN);
-        builder.append(Constants.TASK_PARAM_CLOSE);
+    public void serialize(Buffer builder) {
+        builder.writeString(TokenActionNames.INITIALIZE_VOCABULARY);
+        builder.writeChar(Constants.TASK_PARAM_OPEN);
+        builder.writeChar(Constants.TASK_PARAM_CLOSE);
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder res = new StringBuilder();
-        serialize(res);
-        return res.toString();
-    }
 }

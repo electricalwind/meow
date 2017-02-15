@@ -18,6 +18,7 @@ package meow.languageprocessing.corpus.actions;
 import greycat.*;
 import greycat.internal.task.TaskHelper;
 import greycat.plugin.SchedulerAffinity;
+import greycat.struct.Buffer;
 import meow.languageprocessing.corpus.task.CorpusTask;
 
 import static meow.languageprocessing.corpus.actions.CorpusActionNames.GET_OR_CREATE_CORPUS;
@@ -54,17 +55,11 @@ public class ActionGetOrCreateCorpus implements Action {
                         });
     }
 
-    public void serialize(StringBuilder builder) {
-        builder.append(GET_OR_CREATE_CORPUS);
-        builder.append(Constants.TASK_PARAM_OPEN);
+    public void serialize(Buffer builder) {
+        builder.writeString(GET_OR_CREATE_CORPUS);
+        builder.writeChar(Constants.TASK_PARAM_OPEN);
         TaskHelper.serializeString(_corpusName, builder, true);
-        builder.append(Constants.TASK_PARAM_CLOSE);
+        builder.writeChar(Constants.TASK_PARAM_CLOSE);
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder res = new StringBuilder();
-        serialize(res);
-        return res.toString();
-    }
 }

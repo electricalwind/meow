@@ -41,7 +41,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.0.6</kotlin.version>
         <dokka.version>0.9.9</dokka.version>
-        <greycat.version>1-SNAPSHOT</greycat.version>
+        <greycat.version>2-SNAPSHOT</greycat.version>
         <header.path>${basedir}/HEADER</header.path>
     </properties>
 
@@ -93,7 +93,7 @@
         <dependency>
             <groupId>lu.jimenez.research</groupId>
             <artifactId>my-little-plugin</artifactId>
-            <version>1.0</version>
+            <version>${greycat.version}</version>
         </dependency>
         <dependency>
             <groupId>com.datathings</groupId>

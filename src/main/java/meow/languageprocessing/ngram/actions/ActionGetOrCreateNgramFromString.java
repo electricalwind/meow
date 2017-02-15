@@ -18,6 +18,7 @@ package meow.languageprocessing.ngram.actions;
 import greycat.*;
 import greycat.internal.task.TaskHelper;
 import greycat.plugin.SchedulerAffinity;
+import greycat.struct.Buffer;
 import meow.languageprocessing.ngram.task.NgramTask;
 
 public class ActionGetOrCreateNgramFromString implements Action {
@@ -52,17 +53,11 @@ public class ActionGetOrCreateNgramFromString implements Action {
                         });
     }
 
-    public void serialize(StringBuilder builder) {
-        builder.append(NgramActionNames.GET_OR_CREATE_NGRAM_FROM_STRING);
-        builder.append(Constants.TASK_PARAM_OPEN);
+    public void serialize(Buffer builder) {
+        builder.writeString(NgramActionNames.GET_OR_CREATE_NGRAM_FROM_STRING);
+        builder.writeChar(Constants.TASK_PARAM_OPEN);
         TaskHelper.serializeStringParams(_grams,builder);
-        builder.append(Constants.TASK_PARAM_CLOSE);
+        builder.writeChar(Constants.TASK_PARAM_CLOSE);
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder res = new StringBuilder();
-        serialize(res);
-        return res.toString();
-    }
 }

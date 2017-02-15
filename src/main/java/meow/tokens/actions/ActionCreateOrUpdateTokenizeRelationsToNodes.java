@@ -18,6 +18,7 @@ package meow.tokens.actions;
 import greycat.*;
 import greycat.internal.task.TaskHelper;
 import greycat.plugin.SchedulerAffinity;
+import greycat.struct.Buffer;
 import meow.tokens.task.RelationTask;
 
 public class ActionCreateOrUpdateTokenizeRelationsToNodes implements Action {
@@ -57,24 +58,18 @@ public class ActionCreateOrUpdateTokenizeRelationsToNodes implements Action {
     }
 
     @Override
-    public void serialize(StringBuilder builder) {
-        builder.append(TokenActionNames.CREATE_OR_UPDATE_TOKENIZE_RELATIONS_TO_NODES);
-        builder.append(Constants.TASK_PARAM_OPEN);
+    public void serialize(Buffer builder) {
+        builder.writeString(TokenActionNames.CREATE_OR_UPDATE_TOKENIZE_RELATIONS_TO_NODES);
+        builder.writeChar(Constants.TASK_PARAM_OPEN);
         TaskHelper.serializeString(_tokenizersVar, builder, true);
-        builder.append(Constants.TASK_PARAM_SEP);
+        builder.writeChar(Constants.TASK_PARAM_SEP);
         TaskHelper.serializeString(_nodesVar, builder, true);
         if (_relationList != null && _relationList.length > 0) {
-            builder.append(Constants.TASK_PARAM_SEP);
+            builder.writeChar(Constants.TASK_PARAM_SEP);
             TaskHelper.serializeStringParams(_relationList, builder);
         }
-        builder.append(Constants.TASK_PARAM_CLOSE);
+        builder.writeChar(Constants.TASK_PARAM_CLOSE);
 
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder res = new StringBuilder();
-        serialize(res);
-        return res.toString();
-    }
 }

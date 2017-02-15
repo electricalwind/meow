@@ -17,6 +17,7 @@ package meow.languageprocessing.languagemodel.actions;
 
 import greycat.Action;
 import greycat.TaskContext;
+import greycat.struct.Buffer;
 
 public class ActionGetOrCreateNgramCorpus implements Action {
     @Override
@@ -25,7 +26,7 @@ public class ActionGetOrCreateNgramCorpus implements Action {
     }
 
     @Override
-    public void serialize(StringBuilder builder) {
+    public void serialize(Buffer builder) {
 
     }
 }
