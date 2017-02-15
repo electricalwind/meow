@@ -26,11 +26,13 @@ import meow.languageprocessing.ngram.NgramConstants.*
 import meow.languageprocessing.ngram.actions.NgramActions.*
 import meow.tokens.TokensConstants.II_TC
 import meow.utils.GreyCatUtilitary.keyOfLongToLongArrayMap
+import mylittleplugin.MyLittleActions.traverseDedup
 
 
 class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) : BaseNode(p_world, p_time, p_id, p_graph) {
 
-    fun predict(ngramIds: LongArray, result: Callback<IntArray>) {
+
+    fun count(ngramIds: LongArray, result: Callback<IntArray>) {
         val ngToII = getNgramToNgramInvertedIndex()
         val resultArray: IntArray = IntArray(ngramIds.size, { 0 })
 
@@ -172,8 +174,8 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                         }
                                         ctx.continueTask()
                                     }
-                                    .traverse(INVERTED_NGRAM_INDEX_RELATION)
-                                    //. would need a deduplicate TODO
+
+                                    .then(traverseDedup(INVERTED_NGRAM_INDEX_RELATION))
                                     .thenDo {
                                         ctx ->
                                         ctx.result().asArray()
@@ -181,8 +183,10 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                                     result ->
                                                     val node = result as Node
                                                     val nodeId = node.id()
-                                                    val order = node.get("order") as Int
-                                                    ngramOrder.delete(order.toLong(),nodeId)
+                                                    if (ngToII.get(nodeId).isEmpty()) {
+                                                        val order = node.get("order") as Int
+                                                        ngramOrder.delete(order.toLong(), nodeId)
+                                                    }
                                                 }
                                         ctx.continueTask()
                                     }
@@ -234,9 +238,25 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                             val ngram = node.get(INVERTED_NGRAM_INDEX_RELATION) as Relation
                                             val ngramId = ngram[0]
 
+
                                             ngToII.put(ngramId, nodeId) //add them to the ngram map
                                             tcToII.put(tc, nodeId) //add them to the tc map
                                         }
+                                        ctx.continueTask()
+                                    }
+
+                                    .then(traverseDedup(INVERTED_NGRAM_INDEX_RELATION))
+                                    .thenDo {
+                                        ctx ->
+                                        ctx.result().asArray()
+                                                .forEach { // for all ngram remove
+                                                    result ->
+                                                    val node = result as Node
+                                                    val nodeId = node.id()
+                                                    val order = node.get("order") as Int
+                                                    if (!ngramOrder.contains(order.toLong(), nodeId))
+                                                        ngramOrder.put(order.toLong(), nodeId)
+                                                }
                                         ctx.continueTask()
                                     }
 
@@ -341,6 +361,21 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
                                         }
                                         ctx.continueTask()
                                     }
+
+                                    .then(traverseDedup(INVERTED_NGRAM_INDEX_RELATION))
+                                    .thenDo {
+                                        ctx ->
+                                        ctx.result().asArray()
+                                                .forEach { // for all ngram remove
+                                                    result ->
+                                                    val node = result as Node
+                                                    val nodeId = node.id()
+                                                    val order = node.get("order") as Int
+                                                    if (!ngramOrder.contains(order.toLong(), nodeId))
+                                                        ngramOrder.put(order.toLong(), nodeId)
+                                                }
+                                        ctx.continueTask()
+                                    }
                     )
                     .execute(graph(), {
                         this.graph().resolver().externalUnlock(this)
@@ -361,49 +396,63 @@ class NgramCorpusNode(p_world: Long, p_time: Long, p_id: Long, p_graph: Graph) :
         return getOrCreate("tcMN", Type.LONG_TO_LONG_ARRAY_MAP) as LongLongArrayMap
     }
 
-    private fun getOrderToNgram():LongLongArrayMap{
+    private fun getOrderToNgram(): LongLongArrayMap {
         return getOrCreate("orderToNgram", Type.LONG_TO_LONG_ARRAY_MAP) as LongLongArrayMap
     }
 
 
     fun allTimeNgram(): LongArray {
-        val ngToII = getNgramToNgramInvertedIndex() //ngram to InvertedIndex
+        val OtoN = getOrderToNgram() //ngram to InvertedIndex
 
-        val nbNgram = ngToII.size()
+        val nbNgram = OtoN.size() //TODO check what size is actually returning
 
         val ngramId = LongArray(nbNgram, { 0 })
 
         var i = 0
-        getNgramToNgramInvertedIndex().each { key, value ->
-            ngramId[i] = key
+        OtoN.each { key, value ->
+            ngramId[i] = value
             i++
         }
         return ngramId
     }
 
-    fun allTimeVocabulary(result: Callback<LongArray>) {
-        newTask()
-                .lookupAll(allTimeNgram().joinToString(prefix = "[", separator = ",", postfix = "]"))
-                .selectScript("node.get('order') == 1")
-                .execute(graph(), {
-                    taskresult ->
-                    result.on(taskresult.asArray().map { node -> node as Node }.map(Node::id).toLongArray())
-                })
-
+    fun allTimeVocabulary(): LongArray {
+        return allNgramOfOrder(1)
     }
 
-    fun mapOfCount(result: Callback<Map<Long,Int>>) {
+    fun allNgramOfOrder(order: Int): LongArray {
+        return getOrderToNgram().get(order.toLong())
+    }
+
+
+    fun mapOfCount(result: Callback<Map<Long, Int>>) {
         val ngrams = allTimeNgram()
-        val mapCount = mutableMapOf<Long,Int>()
-        predict(ngrams,Callback{
+        val mapCount = mutableMapOf<Long, Int>()
+        count(ngrams, Callback {
             count ->
             var i = 0
             count.forEach {
-                mapCount.put(ngrams[i],count[i])
+                mapCount.put(ngrams[i], count[i])
                 i++
             }
             result.on(mapCount)
         })
+    }
+
+    companion object afterMapOfCount {
+        fun currentVocabulary(ngramCorpusNode: NgramCorpusNode, mapOfCount: Map<Long, Int>) {
+            currentNgramOfOrder(1, ngramCorpusNode, mapOfCount)
+        }
+
+        fun currentNgramOfOrder(order: Int, ngramCorpusNode: NgramCorpusNode, mapOfCount: Map<Long, Int>): LongArray {
+            val allNgramofOrder = ngramCorpusNode.allNgramOfOrder(order)
+            return allNgramofOrder.filter { ngram -> mapOfCount[ngram]!! > 0 }.toLongArray()
+        }
+
+        fun allCurrentNgram(ngramCorpusNode: NgramCorpusNode, mapOfCount: Map<Long, Int>): LongArray {
+            val allNgram = ngramCorpusNode.allTimeNgram()
+            return allNgram.filter { ngram -> mapOfCount[ngram]!! > 0 }.toLongArray()
+        }
     }
 
 }
