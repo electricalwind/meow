@@ -95,11 +95,6 @@
             <artifactId>my-little-plugin</artifactId>
             <version>${greycat.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.datathings</groupId>
-            <artifactId>greycat-ml</artifactId>
-            <version>${greycat.version}</version>
-        </dependency>
         <!--<dependency>
             <groupId>org.kevoree.mwg.plugins</groupId>
             <artifactId>memory</artifactId>

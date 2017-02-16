@@ -33,4 +33,7 @@ public class NgramConstants {
     public final static String NGRAM_INVERTED_INDEX_RELATION = "invertedIndex";
     public final static String INVERTED_NGRAM_INDEX_RELATION = "ngram";
 
+    public final static boolean ADD_BOS_EOS_TO_NGRAM = true;
+    public final static String BOS = "<~B.O.S~>";
+    public final static String EOS = "<~E.O.S~>";
 }

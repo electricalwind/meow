@@ -20,9 +20,11 @@ import greycat.Constants.*
 import greycat.Tasks.*
 import greycat.plugin.SchedulerAffinity
 import greycat.struct.Relation
+import meow.languageprocessing.ngram.NgramConstants
 import meow.languageprocessing.ngram.NgramConstants.*
 import meow.languageprocessing.ngram.actions.NgramActions.getOrCreateNgramFromVar
 import meow.tokens.TokensConstants.*
+import meow.tokens.actions.TokenActions.getOrCreateTokensFromString
 import meow.utils.MinimunEditDistance
 import meow.utils.UtilTask.checkNodesType
 import mylittleplugin.MyLittleActions.*
@@ -40,7 +42,7 @@ object RelationTask {
     @JvmStatic
     fun updateNgramTokenizeContentVar(tokenizeContentVar: String): Task {
         return newTask()
-                .pipe(checkNodesType(tokenizeContentVar, NODE_TYPE_TOKENIZE_CONTENT))
+                .pipe(checkNodesType(tokenizeContentVar, NODE_TYPE_TOKENIZE_CONTENT)) // Verify that it is a tokenize Content
                 .forEach(
                         updateNgramTokenizeContent()
                 )
@@ -48,13 +50,13 @@ object RelationTask {
 
     private fun updateNgramTokenizeContent(): Task {
         return newTask()
-                .defineAsVar(tokenizedContent)
-                .thenDo { ctx ->
+                .defineAsVar(tokenizedContent) // tc in var
+                .thenDo { ctx -> //storing the type and the id of tc
                     ctx.setVariable(tokenizedContentId, ctx.resultAsNodes()[0].id())
                     ctx.setVariable(tokenizedContentType, ctx.resultAsNodes()[0].get("type") as String)
                     ctx.continueTask()
                 }
-                .thenDo { ctx ->
+                .thenDo { ctx -> //then retrieve all timepoints of the tc //TODO children world
                     ctx.resultAsNodes().get(0).timepoints(BEGINNING_OF_TIME, END_OF_TIME, {
                         timePoints ->
                         timePoints.reverse()
@@ -63,15 +65,16 @@ object RelationTask {
                     })
                 }
 
-                .traverse(TOKENIZE_CONTENT_PLUGIN, NODE_TYPE, NODE_TYPE_NGRAM_TOKENIZED_CONTENT)
+                .traverse(TOKENIZE_CONTENT_PLUGIN, NODE_TYPE, NODE_TYPE_NGRAM_TOKENIZED_CONTENT) // traverse plugin ngram
 
                 .then(
-                        ifEmptyThen(
+                        ifEmptyThen( // if no plugin ngram node create one
                                 createFirstNgramTokenizedContent()
                         )
                 )
-                .setAsVar(ngramtokenizedContent)
-                .thenDo { ctx ->
+                .setAsVar(ngramtokenizedContent) // and store it in a var
+
+                .thenDo { ctx -> // find all timepoints of the tc that are not existing for the ngram plugin TODO children word
                     ctx.resultAsNodes().get(0).timepoints(BEGINNING_OF_TIME, END_OF_TIME, {
                         timePoints ->
                         val toStudy = ctx.variable(tokenizedContentTimepoints).asArray().map { id -> id as Long }.toMutableList()
@@ -80,30 +83,32 @@ object RelationTask {
                         ctx.continueWith(ctx.wrap(toStudy.toLongArray()))
                     })
                 }
-                .forEach(
+
+                .forEach( // for each not existing timepoints update Ngram plugin node
                         newTask()
                                 .setAsVar("timepoint")
                                 .travelInTime("{{timepoint}}")
                                 .pipe(updateNgramsRelation())
-                ).readVar(tokenizedContent)
+                )
+        //.readVar(tokenizedContent) //return the
 
 
     }
 
     private fun createFirstNgramTokenizedContent(): Task {
         return newTask()
-                .thenDo { ctx ->
+                .thenDo { ctx -> // retrieve the first timepoint
                     ctx.setVariable("ft", ctx.variable(tokenizedContentTimepoints).get(0))
                     ctx.continueTask()
                 }
-                .travelInTime("{{ft}}")
+                .travelInTime("{{ft}}") //travel to it
 
-                .createNode()
-                .addVarToRelation("$TOKENIZED_CONTENT_FATHER", "$tokenizedContent")
-                .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_NGRAM_TOKENIZED_CONTENT)
+                .createNode() //create the ngramNode plugin
+                .addVarToRelation("$TOKENIZED_CONTENT_FATHER", "$tokenizedContent") // add relation to the tc
+                .setAttribute(NODE_TYPE, Type.STRING, NODE_TYPE_NGRAM_TOKENIZED_CONTENT) //set its type
                 .setAsVar(ngramtokenizedContent)
                 .pipe(
-                        createNgramsRelation()
+                        createNgramsRelation() //create the ngramRelation
                 )
                 .readVar(tokenizedContentTimepoints)
                 .forEach(
@@ -120,8 +125,8 @@ object RelationTask {
 
     private fun createNgramsRelation(): Task {
         return newTask()
-                .then(readUpdatedTimeVar(tokenizedContent))
-                .traverse(TOKENIZE_CONTENT_TOKENS)
+                .then(readUpdatedTimeVar(tokenizedContent)) //read tc at the good time
+                .traverse(TOKENIZE_CONTENT_TOKENS) //traverse to get the tokens
                 .setAsVar("tokens")
                 .loop("1", "$MAXIMUM_ORDER_OF_N",
 
@@ -172,11 +177,25 @@ object RelationTask {
 
     private fun retrieveNgram(): Task {
         return newTask()
+                .declareVar("tokensfinal")
+                .ifThenElse({NgramConstants.ADD_BOS_EOS_TO_NGRAM},
+                        newTask()
+                                .then(getOrCreateTokensFromString(BOS))
+                                .addToVar("tokensfinal")
+                                .readVar("tokens")
+                                .addToVar("tokensfinal")
+                                .then(getOrCreateTokensFromString(EOS))
+                                .addToVar("tokensfinal")
+                        ,
+                        newTask()
+                                .readVar("tokens")
+                                .addToVar("tokensfinal")
+                )
                 .thenDo { ctx ->
                     val n = ctx.variable("i").get(0) as Int
                     ctx.setVariable("n", n)
-                    val tokens = ctx.variable("tokens").size()
-                    ctx.setVariable("totalNgram", tokens - n)
+                    val nbtokens = ctx.variable("tokensfinal").size()
+                    ctx.setVariable("totalNgram", nbtokens - n)
                     ctx.continueTask()
                 }
                 .declareVar("ngramTokens")
@@ -187,7 +206,7 @@ object RelationTask {
                                 .thenDo { ctx ->
                                     val n = ctx.variable("n").get(0) as Int
                                     val i = ctx.variable("i").get(0) as Int
-                                    val tokens = ctx.variable("tokens").asArray().map { node -> node as Node }.toTypedArray()
+                                    val tokens = ctx.variable("tokensfinal").asArray().map { node -> node as Node }.toTypedArray()
                                     ctx.setVariable("tokensVar", tokens.sliceArray(i..i + n - 1))
                                     ctx.continueTask()
                                 }

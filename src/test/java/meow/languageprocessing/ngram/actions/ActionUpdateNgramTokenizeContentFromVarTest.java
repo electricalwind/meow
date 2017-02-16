@@ -53,6 +53,13 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
         TokenizerFactory tf = new TokenizerFactory("");
         final List<String> tokenizer = tf.create(text1, null).getTokens();
         final List<String> tokenizer2 = tf.create(text11, null).getTokens();
+        if(ADD_BOS_EOS_TO_NGRAM){
+            tokenizer.add(0,BOS);
+            tokenizer.add(EOS);
+            tokenizer2.add(0,BOS);
+            tokenizer2.add(EOS);
+        }
+
         newTask()
                 .travelInTime("0")
                 .then(initializeVocabulary())
@@ -107,7 +114,9 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
                                         int order = (int) ctx.variable("i").get(0);
                                         ctx.setVariable("order", order);
                                         if (order < 9)
-                                            assertEquals(9 - order, ctx.resultAsNodes().size());
+                                            if(ADD_BOS_EOS_TO_NGRAM)
+                                            assertEquals(9 - order +2 , ctx.resultAsNodes().size());
+                                        else assertEquals(9 - order , ctx.resultAsNodes().size());
                                         counter[0]++;
                                         ctx.continueTask();
                                     }
@@ -179,7 +188,10 @@ class ActionUpdateNgramTokenizeContentFromVarTest extends ActionTest {
                                         int order = (int) ctx.variable("i").get(0);
                                         ctx.setVariable("order", order);
                                         if (order < 8)
-                                            assertEquals(8 - order, ctx.resultAsNodes().size());
+                                            if(ADD_BOS_EOS_TO_NGRAM)
+                                            assertEquals(8 - order +2, ctx.resultAsNodes().size());
+                                        else
+                                                assertEquals(8 - order, ctx.resultAsNodes().size());
                                         counter[0]++;
                                         ctx.continueTask();
                                     }
