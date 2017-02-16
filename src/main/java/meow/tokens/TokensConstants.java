@@ -31,6 +31,7 @@ public final class TokensConstants {
     public final static String TOKENIZE_CONTENT_NAME = "name";
     public final static String TOKENIZE_CONTENT_RELATION = "tokenizedContents";
     public final static String TOKENIZE_CONTENT_PLUGIN = "plugin";
+    public final static String TOKENIZE_CONTENT_PATCH = "patch";
 
     public final static String TOKENIZE_CONTENT_FATHER = "father";
 

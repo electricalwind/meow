@@ -19,7 +19,7 @@ import greycat.*
 import greycat.Constants.BEGINNING_OF_TIME
 import greycat.Tasks.*
 import greycat.plugin.SchedulerAffinity
-import greycat.struct.Relation
+import greycat.struct.*
 import meow.tokens.TokensConstants.*
 import meow.tokens.actions.TokenActions.getOrCreateTokensFromString
 import meow.tokens.tokenization.tokenizer.Tokenizer
@@ -166,7 +166,7 @@ object RelationTask {
     private fun updateTokenRelation(): Task {
         return newTask()
                 .defineAsVar("relationNode")
-                .then(checkForFuture())
+                .then(checkForFuture()) //TODO children world
                 .thenDo { ctx ->
                     val dephasing = ctx.resultAsNodes()[0].timeDephasing()
                     if (dephasing == 0L)
@@ -188,6 +188,8 @@ object RelationTask {
                     val relationNodeId = node.id()
                     val type = node.get("type") as String
                     node.rephase()
+                    node.remove(TOKENIZE_CONTENT_PATCH)
+                    val mapPatch = node.getOrCreate(TOKENIZE_CONTENT_PATCH,Type.LONG_TO_LONG_MAP) as LongLongMap
                     val relation = node.get(TOKENIZE_CONTENT_TOKENS) as Relation
                     val relationsId = relation.all().take(relation.size())
                     val newContent = ctx.variable("newToken").asArray()
@@ -200,11 +202,14 @@ object RelationTask {
                     ctx.setVariable("relation", relation)
                     ctx.setVariable("relationId", relationNodeId)
                     ctx.setVariable("type", type)
+                    ctx.setVariable("mapPatch",mapPatch)
                     ctx.continueWith(ctx.wrap(path))
                 }.map(
                 thenDo {
                     ctx ->
                     val action = ctx.result()[0] as Pair<Long, MinimunEditDistance.Modification>
+                    val mapPatch = ctx.variable("mapPatch")[0] as LongLongMap
+                    val index = ctx.variable("i")[0] as Int
                     val relation = ctx.variable("relation")[0] as Relation
                     val newIndex = ctx.variable("newIndex")[0] as Int
                     val formerIndex = ctx.variable("formerIndex")[0] as Int
@@ -213,6 +218,7 @@ object RelationTask {
                     when (action.second) {
                         MinimunEditDistance.Modification.Suppression -> {
                             relation.delete(newIndex)
+                            mapPatch.put(-index.toLong(),action.first)
                             newTask().lookup("${action.first}")
                                     .traverse(WORD_INVERTED_INDEX_RELATION, II_TC, "$relationNodeId")
                                     .thenDo {
@@ -229,6 +235,7 @@ object RelationTask {
                         }
                         MinimunEditDistance.Modification.Insertion -> {
                             relation.insert(newIndex, action.first)
+                            mapPatch.put(index.toLong(),action.first)
                             newTask().lookup("${action.first}")
                                     .defineAsVar("token")
                                     .traverse(WORD_INVERTED_INDEX_RELATION, II_TC, "$relationNodeId")
@@ -290,7 +297,10 @@ object RelationTask {
                 .createNode()
                 .defineAsVar("relationNode")
                 .thenDo { ctx ->
-                    ctx.setVariable("relationNodeId", ctx.resultAsNodes()[0].id())
+
+                    val node = ctx.resultAsNodes()[0]
+                    ctx.setVariable("relationNodeId", node.id())
+                    node.getOrCreate(TOKENIZE_CONTENT_PATCH,Type.LONG_TO_LONG_MAP)
                     ctx.continueTask()
                 }
                 .addVarToRelation(TOKENIZE_CONTENT_FATHER, nodeVar)
@@ -352,7 +362,6 @@ object RelationTask {
 
 
     }
-
 
     val nodeVar = "node"
     val relationVar = "relation"
