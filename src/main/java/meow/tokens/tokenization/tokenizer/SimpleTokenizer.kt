@@ -15,22 +15,23 @@
  */
 package meow.tokens.tokenization.tokenizer
 
-import java.util.*
+import meow.utils.SplitWithDelimiters
 
 
 class SimpleTokenizer(tokens: String) : AbstractTokenizer() {
 
+    val tokenizer = SplitWithDelimiters.split(tokens, "[^A-Za-z0-9]")
+    var i = 0
 
-    val tokenizer: StringTokenizer = StringTokenizer(tokens)
+    //val tokenizer: StringTokenizer = StringTokenizer(tokens, "[^A-Za-z0-9]", true)
     val listOfTokens: MutableList<String> = mutableListOf()
 
 
     override fun countTokens(): Int {
-        return tokenizer.countTokens()
+        return getTokens().size
     }
 
     override fun getTokens(): List<String> {
-
 
         while (hasMoreTokens()) {
             nextToken()
@@ -39,20 +40,33 @@ class SimpleTokenizer(tokens: String) : AbstractTokenizer() {
     }
 
     override fun hasMoreTokens(): Boolean {
-        return tokenizer.hasMoreTokens()
+        return tokenizer.size>i
     }
 
 
-    override fun nextToken(): String {
-        val base = tokenizer.nextToken()
-        if (tokenPreprocess != null) {
-            val tok = tokenPreprocess?.preProcess(base) ?: throw RuntimeException("error while preprocessing")
-            listOfTokens.add(tok)
-            return tok
+    override fun nextToken(): String? {
+        if(hasMoreTokens()) {
+            var base = tokenizer[i]
+            i++
+            while (base.isBlank() && hasMoreTokens()) {
+                if(base == "\n") break
+                base = tokenizer[i]
+                i++
+            }
+            if(base.isBlank() && base != "\n"){
+                return null
+            }
+            if (tokenPreprocess != null) {
+                val tok = tokenPreprocess?.preProcess(base) ?: throw RuntimeException("error while preprocessing")
+                listOfTokens.add(tok)
+                return tok
+            }
+            listOfTokens.add(base)
+            return base
         }
-        listOfTokens.add(base)
-        return base
-
+        else{
+            return null
+        }
     }
 
 

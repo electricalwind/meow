@@ -15,22 +15,14 @@
  */
 package meow.tokens.tokenization.tokenizer
 
-import meow.tokens.tokenization.preprocessor.TokenPreprocessor
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
+class SimpleTokenizerTest {
 
-interface Tokenizer {
-
-    fun countTokens() : Int
-
-    fun getTokens(): List<String>
-
-    fun getTypeOfToken():String?
-
-    fun hasMoreTokens(): Boolean
-
-    fun nextToken(): String?
-
-    fun setTokenPreprocessor(tokenPreprocessor: TokenPreprocessor?)
-
-    fun setTypeOfToken(typeOfToken:String?)
+    @Test
+    fun test() {
+        val st = SimpleTokenizer("Today, I am eating a nice peace of meat!\nthis is not over!")
+        assertEquals(17, st.countTokens())
+    }
 }
