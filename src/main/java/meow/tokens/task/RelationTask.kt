@@ -219,7 +219,8 @@ object RelationTask {
                         MinimunEditDistance.Modification.Suppression -> {
                             relation.delete(newIndex)
                             mapPatch.put(-index.toLong(),action.first)
-                            newTask().lookup("${action.first}")
+                            newTask()
+                                    .lookup("${action.first}")
                                     .traverse(WORD_INVERTED_INDEX_RELATION, II_TC, "$relationNodeId")
                                     .thenDo {
                                         ctx ->
@@ -227,8 +228,10 @@ object RelationTask {
                                         val position: MutableList<Int> = (node.get("position") as IntArray?)?.toMutableList() ?: throw RuntimeException("no position while delete")
                                         position.remove(formerIndex)
                                         node.set("position", Type.INT_ARRAY, position.toIntArray())
+                                        node.free() //Added to check
                                         ctx.continueTask()
-                                    }.executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD, {
+                                    }
+                                    .executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD, {
                                 ctx.setVariable("formerIndex", formerIndex + 1)
                                 ctx.continueTask()
                             })
@@ -263,6 +266,7 @@ object RelationTask {
                                         val position: MutableList<Int> = (node.get("position") as IntArray?)?.toMutableList() ?: mutableListOf<Int>()
                                         position.add(newIndex)
                                         node.set("position", Type.INT_ARRAY, position.toIntArray())
+                                        node.free()
                                         ctx.continueTask()
                                     }.executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD, {
                                 ctx.setVariable("newIndex", newIndex + 1)
@@ -278,6 +282,7 @@ object RelationTask {
                                         position.remove(formerIndex)
                                         position.add(newIndex)
                                         node.set("position", Type.INT_ARRAY, position.toIntArray())
+                                        node.free()
                                         ctx.continueTask()
                                     }.executeFrom(ctx, ctx.result(), SchedulerAffinity.SAME_THREAD, {
                                 ctx.setVariable("formerIndex", formerIndex + 1)
@@ -297,7 +302,6 @@ object RelationTask {
                 .createNode()
                 .defineAsVar("relationNode")
                 .thenDo { ctx ->
-
                     val node = ctx.resultAsNodes()[0]
                     ctx.setVariable("relationNodeId", node.id())
                     node.getOrCreate(TOKENIZE_CONTENT_PATCH,Type.LONG_TO_LONG_MAP)
@@ -349,6 +353,7 @@ object RelationTask {
                                     val position: MutableList<Int> = (node.get("position") as IntArray?)?.toMutableList() ?: mutableListOf<Int>()
                                     position.add(ctx.variable("i")[0] as Int)
                                     node.set("position", Type.INT_ARRAY, position.toIntArray())
+                                    node.free()
                                     ctx.continueTask()
                                 }
 

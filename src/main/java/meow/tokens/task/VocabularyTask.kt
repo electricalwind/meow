@@ -64,6 +64,7 @@ object VocabularyTask : KLogging() {
                                         val content = nodeArray.map { node -> node.get(TOKEN_NAME) as String }.joinToString(separator = " ")
                                         val type = tokenizedContentNode.get("type")
                                         val name = tokenizedContentNode.get(TOKENIZE_CONTENT_NAME)
+                                        nodeArray.map(Node::free)
                                         ctx.continueWith(ctx.wrap(arrayOf(name, type, content)))
                                     })
                                 }
